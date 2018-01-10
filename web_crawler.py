@@ -5,7 +5,7 @@ import threading
 
 
 class Crawler (threading.Thread):
-    def __init__(self, bookTitle, mainLogFile, debug=True, verbose=False):
+    def __init__(self, bookTitle, mainLogFile, basicDirectory, debug=True, verbose=False):
         threading.Thread.__init__(self)
         super(Crawler, self).__init__()
         self._stop_event = threading.Event()
@@ -15,7 +15,7 @@ class Crawler (threading.Thread):
         self.bookDirectory = bookTitle
         self.debug = debug
         self.verbose = verbose
-        self.basicDirectory = "data"
+        self.basicDirectory = basicDirectory
         self.goodReadsHome = "https://www.goodreads.com/"
         self.ratingOutputFile = "0_rating_details.json"
         self.connectedListOutputFile = "00_connected_list.json"
@@ -48,11 +48,11 @@ class Crawler (threading.Thread):
 
     def run(self):
         self.driver = Driver(self.mainLogFile)
-        '''self.crawl_the_data(self.bookTitle)
+        self.crawl_the_data(self.bookTitle)
         self.set_error(False)
         self.driver.log_message("{}: work good.".format(self.bookTitle), self.debug)
-        self.set_complete(True)'''
-        try:
+        self.set_complete(True)
+        '''try:
             self.crawl_the_data(self.bookTitle)
             self.set_error(False)
             self.driver.log_message("{}: work good.".format(self.bookTitle), self.debug)
@@ -61,7 +61,7 @@ class Crawler (threading.Thread):
             self.driver.log_message("{}: got error.".format(self.bookTitle), self.debug)
             self.driver.log_message(exception)
             self.set_error(True)
-            self.set_complete(True)
+            self.set_complete(True)'''
 
     def stop(self):
         self._stop_event.set()
@@ -114,7 +114,7 @@ class Crawler (threading.Thread):
             json.dump(ratingJSON, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
         # get the connected lists
-        connectedListJson = get_connected_lists(self.driver, bookMainUrl)
+        connectedListJson = get_connected_lists(self.driver, self.basicDirectory, bookMainUrl)
         with open(self.bookDirectory + "/" + self.connectedListOutputFile, 'w+', encoding="utf8") as outfile:
             json.dump(connectedListJson, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
@@ -125,7 +125,7 @@ class Crawler (threading.Thread):
         for numOfStar in starsList:
             self.driver.open_browser(bookMainUrl)
             self.driver.scroll_to_top()
-            filter_by_number_of_stars(self.driver, numOfStar)
+            filter_by_number_of_stars(self.driver, numOfStar, self.debug)
             sleep(5)
 
             # get all the long reviews' urls
@@ -219,6 +219,11 @@ class Crawler (threading.Thread):
                                     self.driver.log_message("Cannot solve this problem.")
                                     assert False, "fail to click next page. This page is {}. Next page is {}".format(
                                         thisPage, newNextPage)
+                            elif not self.driver.in_the_right_page(bookMainUrl):
+                                if self.debug:
+                                    self.driver.log_message(
+                                        "fail to click next page. Not in the correct page.", self.debug)
+                                assert False
                             else:
                                 if self.debug:
                                     self.driver.log_message(

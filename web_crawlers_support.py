@@ -13,19 +13,19 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
     if driver.exist_element("//span[@class='reviewer']/a[@class='userReview']"):
         jsonData['reviewerName'] = driver.find_element("//span[@class='reviewer']/a[@class='userReview']").text
     else:
-        jsonData['reviewerName'] = None
+        jsonData['reviewerName'] = ""
         driver.warning_message("reviewerName", verbose)
     if verbose:
         driver.log_message(jsonData['reviewerName'])
     fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
-        jsonData['reviewerName']) + ".json"
+        jsonData['reviewerName'][:25]) + ".json"
 
     # review publish date
     if driver.exist_element("//div[@class='right dtreviewed greyText smallText']/span[@itemprop='publishDate']"):
         jsonData['reviewPublishDate'] = driver.find_element(
             "//div[@class='right dtreviewed greyText smallText']/span[@itemprop='publishDate']").text
     else:
-        jsonData['reviewPublishDate'] = None
+        jsonData['reviewPublishDate'] = ""
         driver.warning_message("reviewPublishDate", verbose)
 
     # review stars
@@ -33,7 +33,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
         jsonData['reviewStars'] = driver.find_element("//div[@itemprop='reviewRating']/span[@class='value-title']"). \
             get_attribute("title")
     else:
-        jsonData['reviewStars'] = None
+        jsonData['reviewStars'] = ""
         driver.warning_message("reviewStars", verbose)
 
     # review reading period
@@ -41,14 +41,14 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
         jsonData['reviewReadingPeriod'] = \
             driver.find_element("//div[@class='big450BoxContent']/div/div[contains(text(),'Read')]").text
     else:
-        jsonData['reviewReadingPeriod'] = None
+        jsonData['reviewReadingPeriod'] = ""
         driver.warning_message("reviewReadingPeriod", verbose)
 
     # review content
     if driver.exist_element("//div[@itemprop='reviewBody']"):
         jsonData['reviewContent'] = driver.find_element("//div[@itemprop='reviewBody']").text
     else:
-        jsonData['reviewContent'] = None
+        jsonData['reviewContent'] = ""
         driver.warning_message("reviewContent", verbose)
 
     # review likes count
@@ -70,7 +70,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
                 reviewDateStatus['reviewProgressDate'] = \
                     driver.find_element(".//td[@class='greyText']/a[@class='greyText']", reviewProgressEle).text
             else:
-                reviewDateStatus['reviewProgressDate'] = None
+                reviewDateStatus['reviewProgressDate'] = ""
                 driver.warning_message("reviewProgressDate", verbose)
 
             # review progress status
@@ -81,7 +81,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
                 reviewDateStatus['reviewProgressStatus'] = \
                     driver.find_element(".//td[contains(text(),'%')]", reviewProgressEle).text
             else:
-                reviewDateStatus['reviewProgressStatus'] = None
+                reviewDateStatus['reviewProgressStatus'] = ""
                 driver.warning_message("reviewProgressStatus", verbose)
 
             jsonData['reviewReadProgressList'].append(reviewDateStatus)
@@ -102,18 +102,19 @@ def get_ratings(driver, ratingEle, bookDirectory, num, verbose=False):
     if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", ratingEle):
         jsonData['reviewerName'] = driver.find_element(".//span[@itemprop='author']/a[@class='user']", ratingEle).text
     else:
-        jsonData['reviewerName'] = None
+        jsonData['reviewerName'] = ""
         driver.warning_message("reviewerName", verbose)
     if verbose:
         driver.log_message(jsonData['reviewerName'])
-    fileName = bookDirectory + "/" + str(num) + "_" + str(jsonData['reviewerName']).replace(" ", "_") + ".json"
+    fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
+        jsonData['reviewerName'][:25]).replace(" ", "_") + ".json"
 
     # review publish date
     if driver.exist_element(".//div[@class='reviewHeader uitext stacked']/a[@class='reviewDate']", ratingEle):
         jsonData['reviewPublishDate'] = \
             driver.find_element(".//div[@class='reviewHeader uitext stacked']/a[@class='reviewDate']", ratingEle).text
     else:
-        jsonData['reviewPublishDate'] = None
+        jsonData['reviewPublishDate'] = ""
         driver.warning_message("reviewPublishDate", verbose)
 
     # review stars
@@ -121,7 +122,7 @@ def get_ratings(driver, ratingEle, bookDirectory, num, verbose=False):
         jsonData['reviewStars'] = \
             len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']", ratingEle))
     else:
-        jsonData['reviewStars'] = None
+        jsonData['reviewStars'] = ""
         driver.warning_message("reviewStars", verbose)
 
     with open(fileName, 'w+', encoding="utf8") as outfile:
@@ -139,7 +140,7 @@ def comments_within_reviews(driver, verbose=False):
                 comment['commentAuthorFullName'] = \
                     driver.find_element(".//span[@class='commentAuthor']/a", commentEle).get_attribute("title")
             else:
-                comment['commentAuthorFullName'] = None
+                comment['commentAuthorFullName'] = ""
                 driver.warning_message("commentAuthorFullName", verbose)
 
             # comment author first name
@@ -147,7 +148,7 @@ def comments_within_reviews(driver, verbose=False):
                 comment['commentAuthorFirstName'] = \
                     driver.find_element(".//span[@class='commentAuthor']/a", commentEle).text
             else:
-                comment['commentAuthorFirstName'] = None
+                comment['commentAuthorFirstName'] = ""
                 driver.warning_message("commentAuthorFirstName", verbose)
 
             # comment author status
@@ -155,7 +156,7 @@ def comments_within_reviews(driver, verbose=False):
                 comment['commentAuthorStatus'] = \
                     driver.find_element(".//span[@class='greyText smallText']/a", commentEle).text
             else:
-                comment['commentAuthorStatus'] = None
+                comment['commentAuthorStatus'] = ""
                 driver.warning_message("commentAuthorStatus", verbose)
 
             # comment time
@@ -163,7 +164,7 @@ def comments_within_reviews(driver, verbose=False):
                 comment['commentTime'] = \
                     driver.find_element(".//div[@class='right']/a[@rel='nofollow']", commentEle).text
             else:
-                comment['commentTime'] = None
+                comment['commentTime'] = ""
                 driver.warning_message("commentTime", verbose)
 
             # comment content
@@ -171,7 +172,7 @@ def comments_within_reviews(driver, verbose=False):
                 comment['commentContent'] = \
                     driver.find_element(".//div[@class='mediumText reviewText']", commentEle).text
             else:
-                comment['commentContent'] = None
+                comment['commentContent'] = ""
                 driver.warning_message("commentContent", verbose)
 
                 commentList.append(comment)
@@ -263,23 +264,27 @@ def remove_invalid_characters_from_filename(filename):
     elif platform == "darwin":
         filename = filename
     elif platform == "win32":
-        charactersList = ["<", ">", ":", "\"", "/", "\\", "|", "?", "*"]
+        charactersList = ["<", ">", ":", "\"", "/", "\\", "|", "?", "*", "*"]
         for x in charactersList:
             filename = filename.replace(x, "")
 
     return filename
 
 
-def filter_by_number_of_stars(driver, numOfStars):
+def filter_by_number_of_stars(driver, numOfStars, debug=True):
     while True:
         sleep(3)
         driver.click_element("//span[contains(text(), 'Filter')]")
+        if not driver.in_the_right_page():
+            driver.log_message("Fail to click 'Filter'. Not in the correct page.", debug)
         sleep(2)
         driver.driver_wait(
             "//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]".format(numOfStars))
         try:
             driver.click_element("//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]"
                                  .format(numOfStars), inActionChain=True)
+            if not driver.in_the_right_page():
+                driver.log_message("Fail to click 'the stars' in the 'Filter'. Not in the correct page.", debug)
         except:
             driver.log_message("fail to click the stars filter.")
             continue
@@ -292,28 +297,59 @@ def filter_by_number_of_stars(driver, numOfStars):
 
 def check_num_of_star(driver, numOfStar):
     sleep(2)
+    stars = []
+
+    # if get a selenium.common.exceptions.StaleElementReferenceException:
+    # Message: stale element reference: element is not attached to the page document
+    # The reason is we scan the reveiwEles before the filter works. And these reviewEles are removed after the filter.
+    # same as rating elements
+
     # get review elements
-    reviewEles = []
-    if driver.exist_element("//div[@class='friendReviews elementListBrown']"):
-        driver.driver_wait("//div[@class='friendReviews elementListBrown']")
-        reviewEles = driver.find_elements("//div[@class='friendReviews elementListBrown']")
-        driver.log_message("There are {} reviews after filter with stars.".format(len(reviewEles)))
+    try:
+        reviewEles = []
+        if driver.exist_element("//div[@class='friendReviews elementListBrown']"):
+            driver.driver_wait("//div[@class='friendReviews elementListBrown']")
+            reviewEles = driver.find_elements("//div[@class='friendReviews elementListBrown']")
+            driver.log_message("There are {} reviews after filter with stars.".format(len(reviewEles)))
+
+        for reviewEle in reviewEles:
+            stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
+                                                  reviewEle)))
+    except Exception as exception:
+        if "element is not attached to the page document" in exception.__str__():
+            reviewEles = []
+            if driver.exist_element("//div[@class='friendReviews elementListBrown']"):
+                driver.driver_wait("//div[@class='friendReviews elementListBrown']")
+                reviewEles = driver.find_elements("//div[@class='friendReviews elementListBrown']")
+                driver.log_message("There are {} reviews after filter with stars.".format(len(reviewEles)))
+
+            for reviewEle in reviewEles:
+                stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
+                                                      reviewEle)))
 
     # get rating elements
-    ratingEles = []
-    if driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
-        driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
-        ratingEles = driver.find_elements("//div[@class='friendReviews elementListBrown notext']")
-        driver.log_message("There are {} ratings after filter with stars.".format(len(ratingEles)))
+    try:
+        ratingEles = []
+        if driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
+            driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
+            ratingEles = driver.find_elements("//div[@class='friendReviews elementListBrown notext']")
+            driver.log_message("There are {} ratings after filter with stars.".format(len(ratingEles)))
 
-    stars = []
-    for reviewEle in reviewEles:
-        stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
-                                              reviewEle)))
+        for ratingEle in ratingEles:
+            stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
+                                                  ratingEle)))
+    except Exception as exception:
+        if "element is not attached to the page document" in exception.__str__():
+            ratingEles = []
+            if driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
+                driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
+                ratingEles = driver.find_elements("//div[@class='friendReviews elementListBrown notext']")
+                driver.log_message("There are {} ratings after filter with stars.".format(len(ratingEles)))
 
-    for ratingEle in ratingEles:
-        stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
-                                              ratingEle)))
+            for ratingEle in ratingEles:
+                stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
+                                                      ratingEle)))
+
     driver.log_message("The stars are " + ", ".join(str(x) for x in stars))
 
     for star in stars:

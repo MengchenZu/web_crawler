@@ -2,9 +2,10 @@ from web_crawlers_support import *
 from selenium_support import create_directory
 
 
-def get_connected_lists(driver, url):
+def get_connected_lists(driver, basicDirectory, url):
     driver.open_browser(url)
 
+    fileName = basicDirectory + "/existing_lists.txt"
     connectedList = []
     if driver.exist_element("//a[@class='actionLink' and contains(text(), 'More lists')]"):
         driver.click_element("//a[@class='actionLink' and contains(text(), 'More lists')]")
@@ -17,7 +18,7 @@ def get_connected_lists(driver, url):
                 eachCellJson = dict()
                 eachCellJson['listName'] = driver.find_element(".//a[@class='listTitle']", cell).text
 
-                with open("data/existing_lists.txt", 'a+', encoding="utf8") as outfile:
+                with open(fileName, 'a+', encoding="utf8") as outfile:
                     outfile.write(eachCellJson['listName'] + "\n")
 
                 string = str(driver.find_element(".//div[@class='listFullDetails']", cell).text)

@@ -12,7 +12,7 @@ class Driver:
         f_driver = open("driver_name.txt", "r")
         driver_name = f_driver.read()
         self.driver = webdriver.Chrome(driver_name)
-        self.driver.set_page_load_timeout(30)
+        self.driver.set_page_load_timeout(120)
         self.logFile = mainLogFile
 
     def get_log_file(self):
@@ -26,14 +26,14 @@ class Driver:
             self.driver.get(url)
         except Exception as exception:
             self.log_message(exception)
-            if "TimeoutException" in exception:
+            if "TimeoutException" in exception.__str__():
                 self.driver.refresh()
                 sleep(60)
-        if not self.check_right_page(url):
+        if not self.in_the_right_page(url):
             if debug:
                 self.log_message("not is correct page.")
             self.driver.get(url)
-            if not self.check_right_page(url):
+            if not self.in_the_right_page(url):
                 self.log_message("still not in the correct page.")
                 assert False, "fail to open the browser"
             else:
@@ -41,17 +41,22 @@ class Driver:
 
     def refresh(self):
         self.driver.refresh()
+        self.log_message("Refresh the page.")
 
     def current_url(self):
+        self.log_message("Current url is {}".format(self.driver.current_url))
         return self.driver.current_url
 
     def close_browser(self):
         self.driver.close()
+        self.log_message("Close the driver.")
 
-    def check_right_page(self, url):
-        return str(self.driver.current_url) == str(url)
+    def in_the_right_page(self, url):
+        self.log_message("We want {}, and we are at {}".format(str(url), self.current_url()))
+        return str(self.current_url()) == str(url)
 
     def driver_wait(self, xpath):
+        self.log_message("Waiting for the element: {}.".format(xpath))
         WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, xpath)))
 
     def click_element(self, xpath=None, ele=None, inActionChain=False):
@@ -61,18 +66,17 @@ class Driver:
             ele.click()
         except Exception as exception:
             self.log_message(exception)
-            if "TimeoutException" in exception and not inActionChain:
+            if "timeout" in exception.__str__() and not inActionChain:
                 self.driver.refresh()
                 sleep(60)
                 ele.click()
-            elif "is not clickable at point" in exception and not inActionChain:
+            elif "is not clickable at point" in exception.__str__() and not inActionChain:
                 self.scroll_to_top()
                 ele.click()
             else:
                 assert False, "fail to click the element"
 
     def click_execute_script(self, ele):
-        # driver.execute_script("arguments[0].click();", ele)
         self.driver.execute_script("arguments[0].style.visibility = 'visible';", ele)
         ele.click()
 
@@ -127,20 +131,22 @@ class Driver:
         ActionChains(self.driver).move_by_offset(x, y).perform()
 
     def scroll_to_top(self):
+        self.log_message("Scroll to top.")
         self.driver.execute_script("window.scrollTo(0, 0);")
 
     def scroll_to_bottom(self):
+        self.log_message("Scroll to bottom.")
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
     def log_message(self, message, debug=True):
         if debug:
             with open(self.logFile, 'a+') as outfile:
-                outfile.write("{}: {}\n".format(strftime('%X %x'), message))
+                outfile.write("{}: {}\n".format(strftime('%X %x'), str(message)))
 
     def warning_message(self, item, debug=True):
         if debug:
             with open(self.logFile, 'a+') as outfile:
-                outfile.write("{}: Warning: {} is not found.\n".format(strftime('%X %x'), item))
+                outfile.write("{}: Warning: {} is not found.\n".format(strftime('%X %x'), str(item)))
 
 
 def create_directory(path):
