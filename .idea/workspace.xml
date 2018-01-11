@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="671f67b7-5fd6-4b43-92c9-750681a55e48" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test.py" afterPath="$PROJECT_DIR$/test.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web_crawler.py" afterPath="$PROJECT_DIR$/web_crawler.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web_crawlers_support.py" afterPath="$PROJECT_DIR$/web_crawlers_support.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -20,13 +17,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="web_crawler.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="web_crawler.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/web_crawler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="588">
-              <caret line="245" column="0" lean-forward="true" selection-start-line="245" selection-start-column="0" selection-end-line="245" selection-end-column="0" />
+            <state relative-caret-position="22">
+              <caret line="48" column="18" lean-forward="false" selection-start-line="48" selection-start-column="18" selection-end-line="48" selection-end-column="18" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
+                <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
               </folding>
             </state>
           </provider>
@@ -35,7 +33,7 @@
       <file leaf-file-name="web_crawlers_support.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/web_crawlers_support.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2332">
+            <state relative-caret-position="4642">
               <caret line="301" column="16" lean-forward="false" selection-start-line="301" selection-start-column="16" selection-end-line="301" selection-end-column="16" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -47,7 +45,7 @@
       <file leaf-file-name="selenium_support.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/selenium_support.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="44">
+            <state relative-caret-position="1034">
               <caret line="71" column="39" lean-forward="false" selection-start-line="71" selection-start-column="12" selection-end-line="71" selection-end-column="39" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
@@ -68,7 +66,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="search_element.txt" pinned="false" current-in-tab="true">
+      <file leaf-file-name="search_element.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/search_element.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="88">
@@ -397,7 +395,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19033675" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -436,6 +434,7 @@
           <caret line="21" column="117" lean-forward="false" selection-start-line="19" selection-start-column="4" selection-end-line="21" selection-end-column="117" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -453,6 +452,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -470,6 +470,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -495,6 +496,7 @@
           <caret line="34" column="64" lean-forward="false" selection-start-line="34" selection-start-column="64" selection-end-line="34" selection-end-column="64" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -512,6 +514,7 @@
           <caret line="141" column="29" lean-forward="false" selection-start-line="141" selection-start-column="21" selection-end-line="141" selection-end-column="29" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -544,6 +547,7 @@
           <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -569,6 +573,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -593,6 +598,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -617,6 +623,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -641,6 +648,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -658,6 +666,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -675,6 +684,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -692,6 +702,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -702,6 +713,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
           </folding>
         </state>
       </provider>
@@ -747,19 +759,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/selenium_support.py">
+    <entry file="file://$PROJECT_DIR$/search_element.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="44">
-          <caret line="71" column="39" lean-forward="false" selection-start-line="71" selection-start-column="12" selection-end-line="71" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#30#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="88">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="41" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/web_crawlers_support.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2332">
+        <state relative-caret-position="4642">
           <caret line="301" column="16" lean-forward="false" selection-start-line="301" selection-start-column="16" selection-end-line="301" selection-end-column="16" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -777,21 +787,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web_crawler.py">
+    <entry file="file://$PROJECT_DIR$/selenium_support.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="588">
-          <caret line="245" column="0" lean-forward="true" selection-start-line="245" selection-start-column="0" selection-end-line="245" selection-end-column="0" />
+        <state relative-caret-position="1034">
+          <caret line="71" column="39" lean-forward="false" selection-start-line="71" selection-start-column="12" selection-end-line="71" selection-end-column="39" />
           <folding>
-            <element signature="e#0#29#0" expanded="true" />
+            <element signature="e#0#30#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/search_element.txt">
+    <entry file="file://$PROJECT_DIR$/web_crawler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="41" />
-          <folding />
+        <state relative-caret-position="22">
+          <caret line="48" column="18" lean-forward="false" selection-start-line="48" selection-start-column="18" selection-end-line="48" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+            <marker date="1515638429088" expanded="true" signature="1422:1886" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -47,12 +47,7 @@ class Crawler (threading.Thread):
         self.error = error
 
     def run(self):
-        self.driver = Driver(self.mainLogFile)
-        self.crawl_the_data(self.bookTitle)
-        self.set_error(False)
-        self.driver.log_message("{}: work good.".format(self.bookTitle), self.debug)
-        self.set_complete(True)
-        '''try:
+        try:
             self.crawl_the_data(self.bookTitle)
             self.set_error(False)
             self.driver.log_message("{}: work good.".format(self.bookTitle), self.debug)
@@ -61,7 +56,7 @@ class Crawler (threading.Thread):
             self.driver.log_message("{}: got error.".format(self.bookTitle), self.debug)
             self.driver.log_message(exception)
             self.set_error(True)
-            self.set_complete(True)'''
+            self.set_complete(True)
 
     def stop(self):
         self._stop_event.set()
