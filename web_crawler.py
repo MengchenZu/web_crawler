@@ -47,6 +47,7 @@ class Crawler (threading.Thread):
         self.error = error
 
     def run(self):
+        self.driver = Driver(self.mainLogFile)
         try:
             self.crawl_the_data(self.bookTitle)
             self.set_error(False)
