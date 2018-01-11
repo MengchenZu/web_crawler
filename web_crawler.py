@@ -106,7 +106,7 @@ class Crawler (threading.Thread):
         self.driver.log_message("start with {}".format(bookTitle), self.debug)
 
         # get the overall reating information
-        '''rating_script = self.driver.find_element(
+        rating_script = self.driver.find_element(
             "//div[@class='reviewControls__ratingDetails reviewControls--left rating_graph']/script").get_attribute(
             "innerHTML")
         ratingJSON = rating_details_script(rating_script)
@@ -116,7 +116,7 @@ class Crawler (threading.Thread):
         # get the connected lists
         connectedListJson = get_connected_lists(self.driver, self.basicDirectory, bookMainUrl)
         with open(self.bookDirectory + "/" + self.connectedListOutputFile, 'w+', encoding="utf8") as outfile:
-            json.dump(connectedListJson, outfile, indent=1, sort_keys=False, ensure_ascii=False)'''
+            json.dump(connectedListJson, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
         # we can only view the first 10 pages of reviews in Goodreads
         # to get more reviews, we filter from 5 stars to 1 star

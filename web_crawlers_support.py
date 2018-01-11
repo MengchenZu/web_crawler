@@ -298,6 +298,8 @@ def filter_by_number_of_stars(driver, numOfStars, bookMainUrl, debug=True):
             driver.log_message("success filter with {} stars.".format(numOfStars))
             return
         driver.log_message("fail to filter with {} stars.".format(numOfStars))
+        driver.refresh()
+        sleep(30)
 
 
 def check_num_of_star(driver, numOfStar):
