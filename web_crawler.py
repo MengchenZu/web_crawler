@@ -106,7 +106,7 @@ class Crawler (threading.Thread):
         self.driver.log_message("start with {}".format(bookTitle), self.debug)
 
         # get the overall reating information
-        rating_script = self.driver.find_element(
+        '''rating_script = self.driver.find_element(
             "//div[@class='reviewControls__ratingDetails reviewControls--left rating_graph']/script").get_attribute(
             "innerHTML")
         ratingJSON = rating_details_script(rating_script)
@@ -116,7 +116,7 @@ class Crawler (threading.Thread):
         # get the connected lists
         connectedListJson = get_connected_lists(self.driver, self.basicDirectory, bookMainUrl)
         with open(self.bookDirectory + "/" + self.connectedListOutputFile, 'w+', encoding="utf8") as outfile:
-            json.dump(connectedListJson, outfile, indent=1, sort_keys=False, ensure_ascii=False)
+            json.dump(connectedListJson, outfile, indent=1, sort_keys=False, ensure_ascii=False)'''
 
         # we can only view the first 10 pages of reviews in Goodreads
         # to get more reviews, we filter from 5 stars to 1 star
@@ -125,7 +125,7 @@ class Crawler (threading.Thread):
         for numOfStar in starsList:
             self.driver.open_browser(bookMainUrl)
             self.driver.scroll_to_top()
-            filter_by_number_of_stars(self.driver, numOfStar, self.debug)
+            filter_by_number_of_stars(self.driver, numOfStar, bookMainUrl, self.debug)
             sleep(5)
 
             # get all the long reviews' urls
@@ -135,7 +135,7 @@ class Crawler (threading.Thread):
                 bigCount = bigCount + 1
                 if bigCount > 20:
                     self.driver.log_message("Fail to click the next page over 20 times", self.debug)
-                    assert False
+                    assert False, "Fail to click the next page over 20 times"
                 if self.driver.exist_element("//div[@id='bookReviews']//a[text()='see review']"):
                     self.driver.driver_wait("//div[@id='bookReviews']//a[text()='see review']")
                     reviewEles = self.driver.find_elements("//div[@id='bookReviews']//a[text()='see review']")
@@ -184,7 +184,7 @@ class Crawler (threading.Thread):
                             count = count + 1
                             if count > 10:
                                 self.driver.log_message("Fail to click the next page over 10 times", self.debug)
-                                assert False
+                                assert False, "Fail to click the next page over 10 times"
                             if self.driver.exist_element(
                                     "//div[@class='uitext']//span[@class='next_page disabled']"):
                                 self.driver.log_message("break at last page".format(), self.debug)

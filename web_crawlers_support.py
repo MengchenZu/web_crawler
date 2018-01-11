@@ -271,24 +271,29 @@ def remove_invalid_characters_from_filename(filename):
     return filename
 
 
-def filter_by_number_of_stars(driver, numOfStars, debug=True):
+def filter_by_number_of_stars(driver, numOfStars, bookMainUrl, debug=True):
+    count = 0
     while True:
+        count = count + 1
+        if count > 10:
+            driver.log_message("Fail to filter by number of stars over 10 times.", debug)
+            assert False, "Fail to filter by number of stars over 10 times."
         sleep(3)
         driver.click_element("//span[contains(text(), 'Filter')]")
-        if not driver.in_the_right_page():
+        if not driver.in_the_right_page(bookMainUrl):
             driver.log_message("Fail to click 'Filter'. Not in the correct page.", debug)
-        sleep(2)
+        sleep(1.5)
         driver.driver_wait(
             "//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]".format(numOfStars))
         try:
             driver.click_element("//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]"
                                  .format(numOfStars), inActionChain=True)
-            if not driver.in_the_right_page():
+            if not driver.in_the_right_page(bookMainUrl):
                 driver.log_message("Fail to click 'the stars' in the 'Filter'. Not in the correct page.", debug)
-        except:
+        except Exception as exception:
             driver.log_message("fail to click the stars filter.")
-            continue
-        sleep(0.5)
+            driver.log_message(exception)
+        sleep(5)
         if check_num_of_star(driver, numOfStars):
             driver.log_message("success filter with {} stars.".format(numOfStars))
             return

@@ -26,7 +26,7 @@ debug = True
 verbose = False
 errorList = []
 
-numOfCrawler = 3
+numOfCrawler = 1
 if numOfCrawler > len(bookTitles):
     numOfCrawler = len(bookTitles)
 

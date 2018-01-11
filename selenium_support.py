@@ -52,8 +52,12 @@ class Driver:
         self.log_message("Close the driver.")
 
     def in_the_right_page(self, url):
-        self.log_message("We want {}, and we are at {}".format(str(url), self.current_url()))
-        return str(self.current_url()) == str(url)
+        inTheRightPage = str(self.current_url()) == str(url)
+        if inTheRightPage:
+            self.log_message("Yes. We are at the right page.")
+        else:
+            self.log_message("We want {}, but we are at {}".format(str(url), self.current_url()))
+        return inTheRightPage
 
     def driver_wait(self, xpath):
         self.log_message("Waiting for the element: {}.".format(xpath))
