@@ -128,19 +128,33 @@ class Crawler (threading.Thread):
             reviewUrls = []
             bigCount = 0
             while True:
+                sleep(10)
                 bigCount = bigCount + 1
                 if bigCount > 20:
                     self.driver.log_message("Fail to click the next page over 20 times", self.debug)
                     assert False, "Fail to click the next page over 20 times"
-                if self.driver.exist_element("//div[@id='bookReviews']//a[text()='see review']"):
-                    self.driver.driver_wait("//div[@id='bookReviews']//a[text()='see review']")
-                    reviewEles = self.driver.find_elements("//div[@id='bookReviews']//a[text()='see review']")
-                else:
-                    reviewEles = []
-                self.driver.log_message("We got {} reviews on this page.".format(len(reviewEles)), self.debug)
+                try:
+                    if self.driver.exist_element("//div[@id='bookReviews']//a[text()='see review']"):
+                        self.driver.driver_wait("//div[@id='bookReviews']//a[text()='see review']")
+                        reviewEles = self.driver.find_elements("//div[@id='bookReviews']//a[text()='see review']")
+                    else:
+                        reviewEles = []
+                    self.driver.log_message("We got {} reviews on this page.".format(len(reviewEles)), self.debug)
 
-                if not len(reviewEles) == 0:
-                    reviewUrls.extend([x.get_attribute('href') for x in reviewEles])
+                    if not len(reviewEles) == 0:
+                        reviewUrls.extend([x.get_attribute('href') for x in reviewEles])
+                except Exception as exception:
+                    self.driver.log_message(exception, self.debug)
+                    if "element is not attached to the page document" in exception.__str__():
+                        if self.driver.exist_element("//div[@id='bookReviews']//a[text()='see review']"):
+                            self.driver.driver_wait("//div[@id='bookReviews']//a[text()='see review']")
+                            reviewEles = self.driver.find_elements("//div[@id='bookReviews']//a[text()='see review']")
+                        else:
+                            reviewEles = []
+                        self.driver.log_message("We got {} reviews on this page.".format(len(reviewEles)), self.debug)
+
+                        if not len(reviewEles) == 0:
+                            reviewUrls.extend([x.get_attribute('href') for x in reviewEles])
 
                 # start to get the reviews and ratings without reviews
                 # get the ratings first
@@ -219,7 +233,7 @@ class Crawler (threading.Thread):
                                 if self.debug:
                                     self.driver.log_message(
                                         "fail to click next page. Not in the correct page.", self.debug)
-                                assert False
+                                assert False, "fail to click next page. Not in the correct page."
                             else:
                                 if self.debug:
                                     self.driver.log_message(

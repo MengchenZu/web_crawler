@@ -41,7 +41,7 @@ def multiple_threads_crawlers(
                         print(crawlers[i].get_bookTitle())
                         errorList.append(crawlers[i].get_bookTitle())
                         with open(errorBooksFile, 'a+', encoding="utf8") as f:
-                            f.write(crawlers[i].get_bookTitle() + " store in " + crawlers[i].get_bookDirectory + "\n")
+                            f.write(crawlers[i].get_bookTitle() + " store in " + crawlers[i].get_bookDirectory() + "\n")
                         crawlers[i].stop()
                         crawlers[i].close_browser()
                         crawlers[i].set_error(False)
