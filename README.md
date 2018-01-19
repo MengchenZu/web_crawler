@@ -9,9 +9,13 @@ parameters have default values.
 
 First, we need to install one of the WebDriver (https://sites.google.com/a/chromium.org/chromedriver/ for Chrome driver)
 and add the path to the WebDriver into the file "driver_name.txt".
-Second, add some book titles or ISBNs for searching in GoodReads in "search_elements.txt". (There are already some
+
+Second, run "python -m pip install -U selenium" in command line to install selenium.
+
+Third, add some book titles or ISBNs for searching in GoodReads in "search_elements.txt". (There are already some
 examples in the "search_elements.txt")
-Third, edit the parameters in the test.py and run the test.py to have a try.
+
+At last, edit the parameters in the test.py and run the test.py to have a try.
 
 
 ## Files Description

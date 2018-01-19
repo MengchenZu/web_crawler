@@ -45,6 +45,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
         driver.warning_message("reviewReadingPeriod", verbose)
 
     # review content
+    # TODO: add image source link as an another component after review content
     if driver.exist_element("//div[@itemprop='reviewBody']"):
         jsonData['reviewContent'] = driver.find_element("//div[@itemprop='reviewBody']").text
     else:
