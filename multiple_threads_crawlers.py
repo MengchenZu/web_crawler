@@ -5,7 +5,7 @@ from selenium_support import create_directory
 
 def multiple_threads_crawlers(
         searchedBooksFile, errorBooksFile="error_books.txt", basicDirectory="data", numOfCrawler=3,
-        mainLogFile="/logFile.log", debug=True, verbose=False):
+        mainLogFile="/logFile.log", verbose=True, debug=True, showMissing=False):
     create_directory(basicDirectory)
 
     with open(mainLogFile, 'a+') as outfile:
@@ -28,7 +28,7 @@ def multiple_threads_crawlers(
     # create a list of crawlers
     crawlers = []
     for i in range(0, numOfCrawler):
-        crawler = Crawler("start", mainLogFile, basicDirectory, debug, verbose)
+        crawler = Crawler("start", mainLogFile, basicDirectory, verbose, debug, showMissing)
         crawlers.append(crawler)
 
     # search the book title or the ISBN
@@ -42,13 +42,17 @@ def multiple_threads_crawlers(
                         errorList.append(crawlers[i].get_bookTitle())
                         with open(errorBooksFile, 'a+', encoding="utf8") as f:
                             f.write(crawlers[i].get_bookTitle() + " store in " + crawlers[i].get_bookDirectory() + "\n")
+                        with open(mainLogFile, 'a+') as outfile:
+                            outfile.write("###############################################\n")
+                            outfile.write("{}: {} got Error.\n".format(strftime('%X %x'), crawlers[i].get_bookTitle()))
+                            outfile.write("###############################################\n")
                         crawlers[i].stop()
                         crawlers[i].close_browser()
                         crawlers[i].set_error(False)
                     else:
                         with open(mainLogFile, 'a+') as outfile:
                             outfile.write("start crawl the data with crawlers[{}] from {}\n".format(i, bookTitle))
-                        crawlers[i] = Crawler(bookTitle, mainLogFile, basicDirectory, debug, verbose)
+                        crawlers[i] = Crawler(bookTitle, mainLogFile, basicDirectory, verbose, debug, showMissing)
                         crawlers[i].set_complete(False)
                         crawlers[i].start()
                         breakFlag = True

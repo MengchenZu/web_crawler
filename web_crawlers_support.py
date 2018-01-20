@@ -4,7 +4,7 @@ from time import *
 import json
 
 
-def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
+def get_reviews(driver, reviewUrl, bookDirectory, num, showMissing=False):
     driver.open_browser(reviewUrl)
     driver.scroll_to_top()
 
@@ -14,8 +14,8 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
         jsonData['reviewerName'] = driver.find_element("//span[@class='reviewer']/a[@class='userReview']").text
     else:
         jsonData['reviewerName'] = ""
-        driver.warning_message("reviewerName", verbose)
-    if verbose:
+        driver.warning_message("reviewerName", showMissing)
+    if showMissing:
         driver.log_message(jsonData['reviewerName'])
     fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
         jsonData['reviewerName'][:25]) + ".json"
@@ -26,7 +26,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
             "//div[@class='right dtreviewed greyText smallText']/span[@itemprop='publishDate']").text
     else:
         jsonData['reviewPublishDate'] = ""
-        driver.warning_message("reviewPublishDate", verbose)
+        driver.warning_message("reviewPublishDate", showMissing)
 
     # review stars
     if driver.exist_element("//div[@itemprop='reviewRating']/span[@class='value-title']"):
@@ -34,7 +34,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
             get_attribute("title")
     else:
         jsonData['reviewStars'] = ""
-        driver.warning_message("reviewStars", verbose)
+        driver.warning_message("reviewStars", showMissing)
 
     # review reading period
     if driver.exist_element("//div[@class='big450BoxContent']/div/div[contains(text(),'Read')]"):
@@ -42,7 +42,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
             driver.find_element("//div[@class='big450BoxContent']/div/div[contains(text(),'Read')]").text
     else:
         jsonData['reviewReadingPeriod'] = ""
-        driver.warning_message("reviewReadingPeriod", verbose)
+        driver.warning_message("reviewReadingPeriod", showMissing)
 
     # review content
     # TODO: add image source link as an another component after review content
@@ -50,14 +50,13 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
         jsonData['reviewContent'] = driver.find_element("//div[@itemprop='reviewBody']").text
     else:
         jsonData['reviewContent'] = ""
-        driver.warning_message("reviewContent", verbose)
+        driver.warning_message("reviewContent", showMissing)
 
     # review likes count
     if driver.exist_element("//span[@class='likesCount']"):
         jsonData['reviewLikesCount'] = driver.find_element("//span[@class='likesCount']").text
     else:
         jsonData['reviewLikesCount'] = 0
-        driver.warning_message("reviewLikesCount", verbose)
 
     # read progresses
     jsonData['reviewReadProgressList'] = []
@@ -72,7 +71,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
                     driver.find_element(".//td[@class='greyText']/a[@class='greyText']", reviewProgressEle).text
             else:
                 reviewDateStatus['reviewProgressDate'] = ""
-                driver.warning_message("reviewProgressDate", verbose)
+                driver.warning_message("reviewProgressDate", showMissing)
 
             # review progress status
             if driver.exist_element(".//td[@colspan='2']", reviewProgressEle):
@@ -83,20 +82,71 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, verbose=False):
                     driver.find_element(".//td[contains(text(),'%')]", reviewProgressEle).text
             else:
                 reviewDateStatus['reviewProgressStatus'] = ""
-                driver.warning_message("reviewProgressStatus", verbose)
+                driver.warning_message("reviewProgressStatus", showMissing)
 
             jsonData['reviewReadProgressList'].append(reviewDateStatus)
     else:
-        driver.warning_message("reviewProgressEle", verbose)
+        driver.warning_message("reviewProgressEle", showMissing)
 
     # comments
-    jsonData['commentList'] = comments_within_reviews(driver, verbose)
+    jsonData['commentList'] = comments_within_reviews(driver, showMissing)
 
     with open(fileName, 'w+', encoding="utf8") as outfile:
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
 
-def get_ratings(driver, ratingEle, bookDirectory, num, verbose=False):
+def get_short_reviews(driver, reviewShortEle, bookDirectory, num, showMissing=False):
+    jsonData = {}
+
+    # reviewer name
+    if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", reviewShortEle):
+        jsonData['reviewerName'] = driver.find_element(
+            ".//span[@itemprop='author']/a[@class='user']", reviewShortEle).text
+    else:
+        jsonData['reviewerName'] = ""
+        driver.warning_message("reviewerName", showMissing)
+    if showMissing:
+        driver.log_message(jsonData['reviewerName'])
+    fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
+        jsonData['reviewerName'][:25]).replace(" ", "_") + ".json"
+
+    # review publish date
+    if driver.exist_element(
+            ".//div[@class='reviewHeader uitext stacked']/a[@class='reviewDate createdAt right']", reviewShortEle):
+        jsonData['reviewPublishDate'] = driver.find_element(
+                ".//div[@class='reviewHeader uitext stacked']/a[@class='reviewDate createdAt right']",
+                reviewShortEle).text
+    else:
+        jsonData['reviewPublishDate'] = ""
+        driver.warning_message("reviewPublishDate", showMissing)
+
+    # review stars
+    if driver.exist_element(".//span[@class=' staticStars']/span[@class='staticStar p10']", reviewShortEle):
+        jsonData['reviewStars'] = \
+            len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']", reviewShortEle))
+    else:
+        jsonData['reviewStars'] = ""
+        driver.warning_message("reviewStars", showMissing)
+
+    # short review content
+    if driver.exist_element(".//span[contains(@id,'freeTextContainer')]", reviewShortEle):
+        jsonData['reviewContent'] = driver.find_element(
+            ".//span[contains(@id,'freeTextContainer')]", reviewShortEle).text
+    else:
+        jsonData['reviewContent'] = ""
+        driver.warning_message("reviewContent", showMissing)
+
+    # review likes count
+    if driver.exist_element(".//span[@class='likesCount']", reviewShortEle):
+        jsonData['reviewLikesCount'] = driver.find_element(".//span[@class='likesCount']", reviewShortEle).text
+    else:
+        jsonData['reviewLikesCount'] = 0
+
+    with open(fileName, 'w+', encoding="utf8") as outfile:
+        json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
+
+
+def get_ratings(driver, ratingEle, bookDirectory, num, showMissing=False):
     jsonData = {}
 
     # reviewer name
@@ -104,8 +154,8 @@ def get_ratings(driver, ratingEle, bookDirectory, num, verbose=False):
         jsonData['reviewerName'] = driver.find_element(".//span[@itemprop='author']/a[@class='user']", ratingEle).text
     else:
         jsonData['reviewerName'] = ""
-        driver.warning_message("reviewerName", verbose)
-    if verbose:
+        driver.warning_message("reviewerName", showMissing)
+    if showMissing:
         driver.log_message(jsonData['reviewerName'])
     fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
         jsonData['reviewerName'][:25]).replace(" ", "_") + ".json"
@@ -116,7 +166,7 @@ def get_ratings(driver, ratingEle, bookDirectory, num, verbose=False):
             driver.find_element(".//div[@class='reviewHeader uitext stacked']/a[@class='reviewDate']", ratingEle).text
     else:
         jsonData['reviewPublishDate'] = ""
-        driver.warning_message("reviewPublishDate", verbose)
+        driver.warning_message("reviewPublishDate", showMissing)
 
     # review stars
     if driver.exist_element(".//span[@class=' staticStars']/span[@class='staticStar p10']", ratingEle):
@@ -124,13 +174,13 @@ def get_ratings(driver, ratingEle, bookDirectory, num, verbose=False):
             len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']", ratingEle))
     else:
         jsonData['reviewStars'] = ""
-        driver.warning_message("reviewStars", verbose)
+        driver.warning_message("reviewStars", showMissing)
 
     with open(fileName, 'w+', encoding="utf8") as outfile:
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
 
-def comments_within_reviews(driver, verbose=False):
+def comments_within_reviews(driver, showMissing=False):
     commentList = []
     if driver.exist_element("//div[@id='comment_list']/div[@class='comment u-anchorTarget']"):
         commentEles = driver.find_elements("//div[@id='comment_list']/div[@class='comment u-anchorTarget']")
@@ -142,7 +192,7 @@ def comments_within_reviews(driver, verbose=False):
                     driver.find_element(".//span[@class='commentAuthor']/a", commentEle).get_attribute("title")
             else:
                 comment['commentAuthorFullName'] = ""
-                driver.warning_message("commentAuthorFullName", verbose)
+                driver.warning_message("commentAuthorFullName", showMissing)
 
             # comment author first name
             if driver.exist_element(".//span[@class='commentAuthor']/a", commentEle):
@@ -150,7 +200,7 @@ def comments_within_reviews(driver, verbose=False):
                     driver.find_element(".//span[@class='commentAuthor']/a", commentEle).text
             else:
                 comment['commentAuthorFirstName'] = ""
-                driver.warning_message("commentAuthorFirstName", verbose)
+                driver.warning_message("commentAuthorFirstName", showMissing)
 
             # comment author status
             if driver.exist_element(".//span[@class='greyText smallText']/a", commentEle):
@@ -158,7 +208,7 @@ def comments_within_reviews(driver, verbose=False):
                     driver.find_element(".//span[@class='greyText smallText']/a", commentEle).text
             else:
                 comment['commentAuthorStatus'] = ""
-                driver.warning_message("commentAuthorStatus", verbose)
+                driver.warning_message("commentAuthorStatus", showMissing)
 
             # comment time
             if driver.exist_element(".//div[@class='right']/a[@rel='nofollow']", commentEle):
@@ -166,7 +216,7 @@ def comments_within_reviews(driver, verbose=False):
                     driver.find_element(".//div[@class='right']/a[@rel='nofollow']", commentEle).text
             else:
                 comment['commentTime'] = ""
-                driver.warning_message("commentTime", verbose)
+                driver.warning_message("commentTime", showMissing)
 
             # comment content
             if driver.exist_element(".//div[@class='mediumText reviewText']", commentEle):
@@ -174,11 +224,11 @@ def comments_within_reviews(driver, verbose=False):
                     driver.find_element(".//div[@class='mediumText reviewText']", commentEle).text
             else:
                 comment['commentContent'] = ""
-                driver.warning_message("commentContent", verbose)
+                driver.warning_message("commentContent", showMissing)
 
                 commentList.append(comment)
     else:
-        driver.warning_message("commentEles", verbose)
+        driver.warning_message("commentEles", showMissing)
 
     return commentList
 

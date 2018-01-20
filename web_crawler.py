@@ -5,7 +5,7 @@ import threading
 
 
 class Crawler (threading.Thread):
-    def __init__(self, bookTitle, mainLogFile, basicDirectory, debug=True, verbose=False):
+    def __init__(self, bookTitle, mainLogFile, basicDirectory, verbose=True, debug=True, showMissing=False):
         threading.Thread.__init__(self)
         super(Crawler, self).__init__()
         self._stop_event = threading.Event()
@@ -13,8 +13,9 @@ class Crawler (threading.Thread):
         self.error = False
         self.bookTitle = bookTitle
         self.bookDirectory = bookTitle
-        self.debug = debug
         self.verbose = verbose
+        self.debug = debug
+        self.showMissing = showMissing
         self.basicDirectory = basicDirectory
         self.goodReadsHome = "https://www.goodreads.com/"
         self.ratingOutputFile = "0_rating_details.json"
@@ -125,7 +126,8 @@ class Crawler (threading.Thread):
             sleep(5)
 
             # get all the long reviews' urls
-            reviewUrls = []
+            if self.verbose:
+                reviewUrls = []
             bigCount = 0
             while True:
                 sleep(10)
@@ -133,19 +135,10 @@ class Crawler (threading.Thread):
                 if bigCount > 20:
                     self.driver.log_message("Fail to click the next page over 20 times", self.debug)
                     assert False, "Fail to click the next page over 20 times"
-                try:
-                    if self.driver.exist_element("//div[@id='bookReviews']//a[text()='see review']"):
-                        self.driver.driver_wait("//div[@id='bookReviews']//a[text()='see review']")
-                        reviewEles = self.driver.find_elements("//div[@id='bookReviews']//a[text()='see review']")
-                    else:
-                        reviewEles = []
-                    self.driver.log_message("We got {} reviews on this page.".format(len(reviewEles)), self.debug)
 
-                    if not len(reviewEles) == 0:
-                        reviewUrls.extend([x.get_attribute('href') for x in reviewEles])
-                except Exception as exception:
-                    self.driver.log_message(exception, self.debug)
-                    if "element is not attached to the page document" in exception.__str__():
+                # if verbose, go to the review page and get the review details
+                if self.verbose:
+                    try:
                         if self.driver.exist_element("//div[@id='bookReviews']//a[text()='see review']"):
                             self.driver.driver_wait("//div[@id='bookReviews']//a[text()='see review']")
                             reviewEles = self.driver.find_elements("//div[@id='bookReviews']//a[text()='see review']")
@@ -155,9 +148,34 @@ class Crawler (threading.Thread):
 
                         if not len(reviewEles) == 0:
                             reviewUrls.extend([x.get_attribute('href') for x in reviewEles])
+                    except Exception as exception:
+                        self.driver.log_message(exception, self.debug)
+                        if "element is not attached to the page document" in exception.__str__():
+                            if self.driver.exist_element("//div[@id='bookReviews']//a[text()='see review']"):
+                                self.driver.driver_wait("//div[@id='bookReviews']//a[text()='see review']")
+                                reviewEles = self.driver.find_elements(
+                                    "//div[@id='bookReviews']//a[text()='see review']")
+                            else:
+                                reviewEles = []
+                            self.driver.log_message(
+                                "We got {} reviews on this page.".format(len(reviewEles)), self.debug)
+
+                            if not len(reviewEles) == 0:
+                                reviewUrls.extend([x.get_attribute('href') for x in reviewEles])
+                # else get the review metadata from the main book page directly
+                else:
+                    reviewShortEles = []
+                    if self.driver.exist_element("//div[@class='friendReviews elementListBrown']"):
+                        self.driver.driver_wait("//div[@class='friendReviews elementListBrown']")
+                        reviewShortEles = self.driver.find_elements("//div[@class='friendReviews elementListBrown']")
+                    self.driver.log_message("We got {} reviews on this page.".format(
+                        len(reviewShortEles)), self.debug)
+                    for reviewShortEle in reviewShortEles:
+                        num = num + 1
+                        get_short_reviews(self.driver, reviewShortEle, self.bookDirectory, num, self.showMissing)
 
                 # start to get the reviews and ratings without reviews
-                # get the ratings first
+                # get the ratings
                 ratingEles = []
                 if self.driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
                     self.driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
@@ -173,7 +191,7 @@ class Crawler (threading.Thread):
                     len(ratingEles)), self.debug)
                 for ratingEle in ratingEles:
                     num = num + 1
-                    get_ratings(self.driver, ratingEle, self.bookDirectory, num, self.verbose)
+                    get_ratings(self.driver, ratingEle, self.bookDirectory, num, self.showMissing)
 
                 # go to next page until the last page or page 10
                 if self.driver.exist_element("//em[@class='current']"):
@@ -246,10 +264,11 @@ class Crawler (threading.Thread):
 
             self.driver.log_message("After {} stars ratings, we have totally {}.".format(numOfStar, num), self.debug)
 
-            # then get the reviews
-            for reviewUrl in reviewUrls:
-                num = num + 1
-                get_reviews(self.driver, reviewUrl, self.bookDirectory, num, self.verbose)
+            # if verbose, get the review details
+            if self.verbose:
+                for reviewUrl in reviewUrls:
+                    num = num + 1
+                    get_reviews(self.driver, reviewUrl, self.bookDirectory, num, self.showMissing)
 
             self.driver.log_message("{}: After {} stars reviews, we have totally {}.".format(
                 self.bookTitle, numOfStar, num), self.debug)

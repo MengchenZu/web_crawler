@@ -42,7 +42,7 @@ def get_connected_lists(driver, basicDirectory, url):
 
 
 # not used so far
-def get_books_information_in_list(driver, listURL, basicDirectory="list", verbose=False):
+def get_books_information_in_list(driver, listURL, basicDirectory="list", showMissing=False):
     driver.open_browser(listURL)
 
     # get the list name and generate the output file name
@@ -66,7 +66,7 @@ def get_books_information_in_list(driver, listURL, basicDirectory="list", verbos
                     ".//span[@class='smallText uitext']/a[contains(text(),'score')]", eachBook).text). \
                 split("score: ")[1].replace(",", "")
 
-            driver.warning_message(eachBookJson['rank'], verbose)
+            driver.warning_message(eachBookJson['rank'], showMissing)
             bookList.append(eachBookJson)
 
         # move to next page

@@ -6,7 +6,9 @@ basicDirectory = "U://data"
 mainLogFile = basicDirectory + "/logFile.log"
 
 debug = True
-verbose = False
+showMissing = False
+verbose = True
 numOfCrawler = 3
 
-multiple_threads_crawlers(searchedBooksFile, errorBooksFile, basicDirectory, numOfCrawler, mainLogFile, debug, verbose)
+multiple_threads_crawlers(searchedBooksFile, errorBooksFile, basicDirectory, numOfCrawler, mainLogFile, verbose,
+                          debug, showMissing)
