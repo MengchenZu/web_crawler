@@ -4,7 +4,7 @@ from time import *
 import json
 
 
-def get_reviews(driver, reviewUrl, bookDirectory, num, showMissing=False):
+def get_reviews(driver, reviewUrl, bookDirectory, num, debug=True, showMissing=False):
     driver.open_browser(reviewUrl)
     driver.scroll_to_top()
 
@@ -89,7 +89,7 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, showMissing=False):
         driver.warning_message("reviewProgressEle", showMissing)
 
     # comments
-    jsonData['commentList'] = comments_within_reviews(driver, showMissing)
+    jsonData['commentList'] = comments_within_reviews(driver, reviewUrl, debug, showMissing)
 
     with open(fileName, 'w+', encoding="utf8") as outfile:
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
@@ -180,55 +180,130 @@ def get_ratings(driver, ratingEle, bookDirectory, num, showMissing=False):
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
 
-def comments_within_reviews(driver, showMissing=False):
+def comments_within_reviews(driver, url, debug=True, showMissing=False):
     commentList = []
-    if driver.exist_element("//div[@id='comment_list']/div[@class='comment u-anchorTarget']"):
-        commentEles = driver.find_elements("//div[@id='comment_list']/div[@class='comment u-anchorTarget']")
-        for commentEle in commentEles:
-            comment = {}
-            # comment author full name
-            if driver.exist_element(".//span[@class='commentAuthor']/a", commentEle):
-                comment['commentAuthorFullName'] = \
-                    driver.find_element(".//span[@class='commentAuthor']/a", commentEle).get_attribute("title")
-            else:
-                comment['commentAuthorFullName'] = ""
-                driver.warning_message("commentAuthorFullName", showMissing)
+    bigCount = 0
+    while True:
+        sleep(10)
+        bigCount = bigCount + 1
+        if bigCount > 20:
+            driver.log_message("Fail to click the next page in comments over 20 times", debug)
+            assert False, "Fail to click the next page in comments over 20 times"
 
-            # comment author first name
-            if driver.exist_element(".//span[@class='commentAuthor']/a", commentEle):
-                comment['commentAuthorFirstName'] = \
-                    driver.find_element(".//span[@class='commentAuthor']/a", commentEle).text
-            else:
-                comment['commentAuthorFirstName'] = ""
-                driver.warning_message("commentAuthorFirstName", showMissing)
+        if driver.exist_element("//div[@id='comment_list']/div[@class='comment u-anchorTarget']"):
+            driver.driver_wait("//div[@id='comment_list']/div[@class='comment u-anchorTarget']")
+            commentEles = driver.find_elements("//div[@id='comment_list']/div[@class='comment u-anchorTarget']")
+            for commentEle in commentEles:
+                comment = {}
+                # comment author full name and first name
+                if driver.exist_element(".//span[@class='commentAuthor']/a", commentEle):
+                    comment['commentAuthorFullName'] = \
+                        driver.find_element(".//span[@class='commentAuthor']/a", commentEle).get_attribute("title")
+                    comment['commentAuthorFirstName'] = \
+                        driver.find_element(".//span[@class='commentAuthor']/a", commentEle).text
+                else:
+                    comment['commentAuthorFullName'] = ""
+                    driver.warning_message("commentAuthorFullName", showMissing)
+                    comment['commentAuthorFirstName'] = ""
+                    driver.warning_message("commentAuthorFirstName", showMissing)
 
-            # comment author status
-            if driver.exist_element(".//span[@class='greyText smallText']/a", commentEle):
-                comment['commentAuthorStatus'] = \
-                    driver.find_element(".//span[@class='greyText smallText']/a", commentEle).text
-            else:
-                comment['commentAuthorStatus'] = ""
-                driver.warning_message("commentAuthorStatus", showMissing)
+                # comment author status
+                if driver.exist_element(".//span[@class='greyText smallText']/a", commentEle):
+                    comment['commentAuthorStatus'] = \
+                        driver.find_element(".//span[@class='greyText smallText']/a", commentEle).text
+                else:
+                    comment['commentAuthorStatus'] = ""
+                    driver.warning_message("commentAuthorStatus", showMissing)
 
-            # comment time
-            if driver.exist_element(".//div[@class='right']/a[@rel='nofollow']", commentEle):
-                comment['commentTime'] = \
-                    driver.find_element(".//div[@class='right']/a[@rel='nofollow']", commentEle).text
-            else:
-                comment['commentTime'] = ""
-                driver.warning_message("commentTime", showMissing)
+                # comment time
+                if driver.exist_element(".//div[@class='right']/a[@rel='nofollow']", commentEle):
+                    comment['commentTime'] = \
+                        driver.find_element(".//div[@class='right']/a[@rel='nofollow']", commentEle).text
+                else:
+                    comment['commentTime'] = ""
+                    driver.warning_message("commentTime", showMissing)
 
-            # comment content
-            if driver.exist_element(".//div[@class='mediumText reviewText']", commentEle):
-                comment['commentContent'] = \
-                    driver.find_element(".//div[@class='mediumText reviewText']", commentEle).text
-            else:
-                comment['commentContent'] = ""
-                driver.warning_message("commentContent", showMissing)
+                # comment content
+                if driver.exist_element(".//div[@class='mediumText reviewText']", commentEle):
+                    comment['commentContent'] = \
+                        driver.find_element(".//div[@class='mediumText reviewText']", commentEle).text
+                else:
+                    comment['commentContent'] = ""
+                    driver.warning_message("commentContent", showMissing)
 
                 commentList.append(comment)
-    else:
-        driver.warning_message("commentEles", showMissing)
+        else:
+            driver.warning_message("commentEles", showMissing)
+
+        # go to next page until the last page or page 10
+        if driver.exist_element("//em[@class='current']"):
+            thisPage = str(driver.find_element("//em[@class='current']").text)
+            if thisPage == str(10):
+                if debug:
+                    driver.log_message("{} break at page 10.".format(url), debug)
+                break
+        else:
+            break
+
+        # click the next page to get comments on next page
+        # prepare to click the next page
+        if driver.exist_element("//div[@class='normalText']//a[@class='next_page']"):
+            driver.driver_wait("//div[@class='normalText']//a[@class='next_page']")
+            if driver.find_element("//div[@class='normalText']//a[@class='next_page']").is_enabled():
+                count = 0
+                while True:
+                    count = count + 1
+                    if count > 10:
+                        driver.log_message("Fail to click the next page over 10 times", debug)
+                        assert False, "Fail to click the next page over 10 times"
+                    if driver.exist_element(
+                            "//div[@class='normalText']//span[@class='next_page disabled']"):
+                        driver.log_message("break at last page".format(), debug)
+                    driver.driver_wait("//div[@class='normalText']//a[@class='next_page']")
+                    driver.scroll_to_top()
+                    driver.click_element("//div[@class='normalText']//a[@class='next_page']",
+                                         inActionChain=True)
+                    sleep(3)
+                    driver.driver_wait("//em[@class='current']")
+                    nextPage = str(driver.find_element("//em[@class='current']").text)
+                    if int(nextPage) == int(thisPage) + 1:
+                        if debug:
+                            driver.log_message(
+                                "success click next page from page {} to page {}.".format(
+                                    thisPage, nextPage), debug)
+                        break
+                    # this else if is going to solve the problem: click the next page twice.
+                    elif int(nextPage) > int(thisPage):
+                        driver.log_message("ERROR: click the next page twice. Now fixing")
+                        driver.click_element("//div[@class='normalText']//a[@class='previous_page']",
+                                             inActionChain=True)
+                        sleep(10)
+                        driver.driver_wait("//em[@class='current']")
+                        newNextPage = str(driver.find_element("//em[@class='current']").text)
+                        if int(newNextPage) == int(thisPage) + 1:
+                            driver.log_message("Problem has been solved.")
+                            driver.log_message(
+                                "success click next page from page {} to page {}.".format(
+                                    thisPage, newNextPage), debug)
+                            break
+                        else:
+                            driver.log_message("Cannot solve this problem.")
+                            assert False, "fail to click next page. This page is {}. Next page is {}".format(
+                                thisPage, newNextPage)
+                    elif not driver.in_the_right_page(url):
+                        if debug:
+                            driver.log_message(
+                                "fail to click next page. Not in the correct page.", debug)
+                        assert False, "fail to click next page. Not in the correct page."
+                    else:
+                        if debug:
+                            driver.log_message(
+                                "fail to click next page. This page is {}. Next page is {}".format(
+                                    thisPage, nextPage), debug)
+        else:
+            if debug:
+                driver.log_message("break at last page", debug)
+            break
 
     return commentList
 

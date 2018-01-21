@@ -1,3 +1,4 @@
+Version 0.91
 # Web_crawler
 This is a web crawler for book reviews and book ratings from GoodReads.
 We can use multiple threads depending on our network speed.

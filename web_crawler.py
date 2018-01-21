@@ -268,7 +268,7 @@ class Crawler (threading.Thread):
             if self.verbose:
                 for reviewUrl in reviewUrls:
                     num = num + 1
-                    get_reviews(self.driver, reviewUrl, self.bookDirectory, num, self.showMissing)
+                    get_reviews(self.driver, reviewUrl, self.bookDirectory, num, self.debug, self.showMissing)
 
             self.driver.log_message("{}: After {} stars reviews, we have totally {}.".format(
                 self.bookTitle, numOfStar, num), self.debug)
