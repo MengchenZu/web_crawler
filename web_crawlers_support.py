@@ -358,10 +358,10 @@ def rating_details_script(rating_script):
     allEdition['averageRating'] = allEditionSentence.split(
         "average rating,\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
     allEdition['ratings'] = allEditionSentence.split("average rating,\\n")[1].split(
-        "ratings,\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
-    allEdition['reviews'] = allEditionSentence.split("ratings,\\n")[1].split(
-        "reviews,\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
-    allEdition['addedBy'] = allEditionSentence.split("reviews,\\n")[1].split(
+        "span> rating")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
+    allEdition['reviews'] = allEditionSentence.split("span> rating")[1].split(
+        "span> review")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
+    allEdition['addedBy'] = allEditionSentence.split("span> review")[1].split(
         " people,\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
     allEdition['toReads'] = allEditionSentence.split(" people,\\n")[1].split(
         " to-reads\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
@@ -372,11 +372,11 @@ def rating_details_script(rating_script):
     thisEditionSentence = result.split("This edition:")[1]
     thisEdition['averageRating'] = thisEditionSentence.split("average rating,\\n")[0].split(
         "<span class=\\\"value\\\">")[1].split("<\/span>")[0]
-    thisEdition['ratings'] = thisEditionSentence.split("average rating,\\n")[1].split("ratings,\\n")[0].split(
+    thisEdition['ratings'] = thisEditionSentence.split("average rating,\\n")[1].split("span> rating")[0].split(
         "<span class=\\\"value\\\">")[1].split("<\/span>")[0]
-    thisEdition['reviews'] = thisEditionSentence.split("ratings,\\n")[1].split("reviews,\\n")[0].split(
+    thisEdition['reviews'] = thisEditionSentence.split("span> rating")[1].split("span> review")[0].split(
         "<span class=\\\"value\\\">")[1].split("<\/span>")[0]
-    thisEdition['addedBy'] = thisEditionSentence.split("reviews,\\n")[1].split(" people,\\n")[0].split(
+    thisEdition['addedBy'] = thisEditionSentence.split("span> review")[1].split(" people,\\n")[0].split(
         "<span class=\\\"value\\\">")[1].split("<\/span>")[0]
     ratingDetails['thisEdition'] = thisEdition
 

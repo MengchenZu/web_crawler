@@ -161,7 +161,10 @@ class Driver:
             return path
         else:
             newPath = path + "_new"
-            os.makedirs(newPath)
+            if not os.path.exists(newPath):
+                os.makedirs(newPath)
             self.log_message("Warning: the directory of '{}' has already exists.".format(path))
             self.log_message("Create a new directory: {}".format(newPath))
             return newPath
+
+
