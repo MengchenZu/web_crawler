@@ -1,12 +1,15 @@
 from web_crawler import *
 from time import *
-from selenium_support import create_directory
+import os
 
 
 def multiple_threads_crawlers(
         searchedBooksFile, errorBooksFile="error_books.txt", basicDirectory="data", numOfCrawler=3,
         mainLogFile="/logFile.log", verbose=True, debug=True, showMissing=False):
-    create_directory(basicDirectory)
+
+    # create the basic directory
+    if not os.path.exists(basicDirectory):
+        os.makedirs(basicDirectory)
 
     with open(mainLogFile, 'a+') as outfile:
         outfile.write("-----------------------------------------------\n")

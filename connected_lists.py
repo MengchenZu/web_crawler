@@ -1,5 +1,4 @@
 from web_crawlers_support import *
-from selenium_support import create_directory
 
 
 def get_connected_lists(driver, basicDirectory, url):
@@ -79,7 +78,7 @@ def get_books_information_in_list(driver, listURL, basicDirectory="list", showMi
     listJson = {"List": bookList}
 
     # create the folder and write the file
-    create_directory(basicDirectory)
+    driver.create_directory(basicDirectory)
     with open(basicDirectory + "/" + listOutputFile, 'w+', encoding="utf8") as outfile:
         json.dump(listJson, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 

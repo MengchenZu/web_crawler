@@ -1,5 +1,5 @@
 from connected_lists import *
-from selenium_support import Driver, create_directory
+from selenium_support import Driver
 from web_crawlers_support import *
 import threading
 
@@ -78,24 +78,30 @@ class Crawler (threading.Thread):
         self.driver.click_element(
             "//img[@src='https://s.gr-assets.com/assets/layout/magnifying_glass-a2d7514d50bcee1a0061f1ece7821750.png']")
 
-        self.driver.driver_wait("//table[@class='tableList']//a[@class='bookTitle']")
-        self.driver.click_element("//table[@class='tableList']//a[@class='bookTitle']")
+        if self.driver.exist_element("//h3[@class='searchSubNavContainer']"):
+            if "No results." in self.driver.find_element("//h3[@class='searchSubNavContainer']").text():
+                assert False, "We didn't find any results with this book title."
+
+        if not bookTitle.isdigit():
+            self.driver.driver_wait("//table[@class='tableList']//a[@class='bookTitle']")
+            self.driver.click_element("//table[@class='tableList']//a[@class='bookTitle']")
+        sleep(1)
         bookMainUrl = self.driver.current_url()
 
         # TODO: a better solution to deal with too long directory name
         # create one directory for one book
         if self.driver.exist_element("//div[@id='metacol']/h1[@id='bookTitle']"):
             bookFormalTitle = self.driver.find_element("//div[@id='metacol']/h1[@id='bookTitle']").text
-            self.bookDirectory = remove_invalid_characters_from_filename(bookFormalTitle[:25]) \
-                if len(bookFormalTitle) > 25 else remove_invalid_characters_from_filename(bookFormalTitle)
+            self.bookDirectory = remove_invalid_characters_from_filename(bookFormalTitle[:50]) \
+                if len(bookFormalTitle) > 50 else remove_invalid_characters_from_filename(bookFormalTitle)
             self.bookDirectory = self.basicDirectory + "/" + self.bookDirectory
         else:
-            self.bookDirectory = remove_invalid_characters_from_filename(bookTitle[:25]) \
-                if len(bookTitle) > 25 else remove_invalid_characters_from_filename(bookTitle)
+            self.bookDirectory = remove_invalid_characters_from_filename(bookTitle[:50]) \
+                if len(bookTitle) > 50 else remove_invalid_characters_from_filename(bookTitle)
             self.bookDirectory = self.basicDirectory + "/" + self.bookDirectory
         self.driver.log_message(self.bookDirectory, self.debug)
         
-        create_directory(self.bookDirectory)
+        self.bookDirectory = self.driver.create_directory(self.bookDirectory)
 
         # create a log file
         logFileName = self.bookDirectory + "/000.log"

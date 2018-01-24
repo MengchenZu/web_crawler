@@ -84,9 +84,11 @@ class Driver:
         self.driver.execute_script("arguments[0].style.visibility = 'visible';", ele)
         ele.click()
 
-    def text_element(self, text, xpath=None, ele=None):
+    def text_element(self, text, xpath=None, ele=None, emptyFirst=False):
         if ele is None:
             ele = self.driver.find_element_by_xpath(xpath)
+        if emptyFirst:
+            ele.clear()
         ele.send_keys(text)
 
     def find_element(self, xpath, ele=None):
@@ -152,7 +154,14 @@ class Driver:
             with open(self.logFile, 'a+') as outfile:
                 outfile.write("{}: Warning: {} is not found.\n".format(strftime('%X %x'), str(item)))
 
-
-def create_directory(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+    def create_directory(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+            self.log_message("Create a new directory: {}".format(path))
+            return path
+        else:
+            newPath = path + "_new"
+            os.makedirs(newPath)
+            self.log_message("Warning: the directory of '{}' has already exists.".format(path))
+            self.log_message("Create a new directory: {}".format(newPath))
+            return newPath
