@@ -11,6 +11,7 @@ class Crawler (threading.Thread):
         self._stop_event = threading.Event()
         self.complete = True
         self.error = False
+        self.errorMessage = ""
         self.bookTitle = bookTitle
         self.bookDirectory = bookTitle
         self.verbose = verbose
@@ -35,6 +36,9 @@ class Crawler (threading.Thread):
     def get_error(self):
         return self.error
 
+    def get_errorMessage(self):
+        return self.errorMessage
+
     def set_bookTitle(self, bookTitle):
         self.bookTitle = bookTitle
 
@@ -47,6 +51,9 @@ class Crawler (threading.Thread):
     def set_error(self, error):
         self.error = error
 
+    def set_errorMessage(self, errorMessage):
+        self.errorMessage = errorMessage
+
     def run(self):
         self.driver = Driver(self.mainLogFile)
         try:
@@ -58,6 +65,7 @@ class Crawler (threading.Thread):
             self.driver.log_message("{}: got error.".format(self.bookTitle), self.debug)
             self.driver.log_message(exception)
             self.set_error(True)
+            self.errorMessage = str(exception)
             self.set_complete(True)
 
     def stop(self):
@@ -82,8 +90,8 @@ class Crawler (threading.Thread):
         if self.driver.exist_element("//h3[@class='searchSubNavContainer']"):
             if "No results." in self.driver.find_element("//h3[@class='searchSubNavContainer']").text:
                 assert False, "We didn't find any results with this book title."
-        if not self.driver.exist_element("//table[@class='tableList']//a[@class='bookTitle']") and \
-            "search?" in self.driver.current_url():
+        if not self.driver.exist_element(
+                "//table[@class='tableList']//a[@class='bookTitle']") and "search?" in self.driver.current_url():
             assert False, "We didn't find any results with this book title."
 
         if not bookTitle.isdigit():
@@ -103,12 +111,12 @@ class Crawler (threading.Thread):
             self.bookDirectory = remove_invalid_characters_from_filename(bookFormalTitle[:100]) \
                 if len(bookFormalTitle) > 100 else remove_invalid_characters_from_filename(bookFormalTitle)
             self.bookDirectory = \
-                self.basicDirectory + "/" + self.bookTitle + "_" + self.bookDirectory + "_" + authorName
+                self.basicDirectory + "/" + self.bookDirectory + "_" + authorName + "_" + self.bookTitle
         else:
             self.bookDirectory = remove_invalid_characters_from_filename(bookTitle[:100]) \
                 if len(bookTitle) > 100 else remove_invalid_characters_from_filename(bookTitle)
             self.bookDirectory = \
-                self.basicDirectory + "/" + self.bookTitle + "_" + self.bookDirectory + "_" + authorName
+                self.basicDirectory + "/" + self.bookDirectory + "_" + authorName + "_" + self.bookTitle
         self.driver.log_message(self.bookDirectory, self.debug)
         
         self.bookDirectory = self.driver.create_directory(self.bookDirectory)

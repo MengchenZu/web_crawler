@@ -4,8 +4,9 @@ import os
 
 
 def multiple_threads_crawlers(
-        searchedBooksFile, errorBooksFile="error_books.txt", basicDirectory="data", numOfCrawler=3,
-        mainLogFile="/logFile.log", verbose=True, debug=True, showMissing=False):
+        searchedBooksFile, errorBooksFile="error_books.txt", notFoundBooksFile="not_found_books.txt",
+        basicDirectory="data", numOfCrawler=3, mainLogFile="/logFile.log", verbose=True, debug=True,
+        showMissing=False):
 
     # create the basic directory
     if not os.path.exists(basicDirectory):
@@ -21,8 +22,11 @@ def multiple_threads_crawlers(
         bookTitles = f.read().splitlines()
 
     errorList = []
-    # empty the error books file
+    notFoundList = []
+    # empty the error books file and not found books file
     with open(errorBooksFile, 'w+', encoding="utf8") as f:
+        f.write("")
+    with open(notFoundBooksFile, 'w+', encoding="utf8") as f:
         f.write("")
 
     if numOfCrawler > len(bookTitles):
@@ -41,17 +45,35 @@ def multiple_threads_crawlers(
             for i in range(0, numOfCrawler):
                 if crawlers[i].get_complete():
                     if crawlers[i].get_error():
-                        print(crawlers[i].get_bookTitle())
-                        errorList.append(crawlers[i].get_bookTitle())
-                        with open(errorBooksFile, 'a+', encoding="utf8") as f:
-                            f.write(crawlers[i].get_bookTitle() + " store in " + crawlers[i].get_bookDirectory() + "\n")
-                        with open(mainLogFile, 'a+') as outfile:
-                            outfile.write("###############################################\n")
-                            outfile.write("{}: {} got Error.\n".format(strftime('%X %x'), crawlers[i].get_bookTitle()))
-                            outfile.write("###############################################\n")
-                        crawlers[i].stop()
-                        crawlers[i].close_browser()
-                        crawlers[i].set_error(False)
+                        if "We didn't find any results with this book title." in crawlers[i].get_errorMessage():
+                            print(crawlers[i].get_bookTitle() + " wasn't found.")
+                            notFoundList.append(crawlers[i].get_bookTitle())
+                            with open(notFoundBooksFile, 'a+', encoding="utf8") as f:
+                                f.write(crawlers[i].get_bookTitle() + "\n")
+                            with open(mainLogFile, 'a+') as outfile:
+                                outfile.write("***********************************************\n")
+                                outfile.write("{}: {} wasn't found.\n".format(strftime(
+                                    '%X %x'), crawlers[i].get_bookTitle()))
+                                outfile.write("***********************************************\n")
+                            crawlers[i].stop()
+                            crawlers[i].close_browser()
+                            crawlers[i].set_error(False)
+                            crawlers[i].set_errorMessage("")
+                        else:
+                            print(crawlers[i].get_bookTitle() + " got error.")
+                            errorList.append(crawlers[i].get_bookTitle())
+                            with open(errorBooksFile, 'a+', encoding="utf8") as f:
+                                f.write(crawlers[i].get_bookTitle() + " store in " +
+                                        crawlers[i].get_bookDirectory() + "\n")
+                            with open(mainLogFile, 'a+') as outfile:
+                                outfile.write("###############################################\n")
+                                outfile.write("{}: {} got Error.\n".format(strftime(
+                                    '%X %x'), crawlers[i].get_bookTitle()))
+                                outfile.write("###############################################\n")
+                            crawlers[i].stop()
+                            crawlers[i].close_browser()
+                            crawlers[i].set_error(False)
+                            crawlers[i].set_errorMessage("")
                     else:
                         with open(mainLogFile, 'a+') as outfile:
                             outfile.write("start crawl the data with crawlers[{}] from {}\n".format(i, bookTitle))
@@ -70,8 +92,11 @@ def multiple_threads_crawlers(
     with open(mainLogFile, 'a+') as outfile:
         outfile.write("-----------------------------------------------\n")
         outfile.write("end at: {}\n".format(strftime('%X %x')))
-        if len(errorList) == 0:
-            outfile.write("Congratulation!!! All books work well.")
-        else:
+        outfile.write("We have searched {}".format(len(bookTitles)))
+        outfile.write("There are total {} books we didn't found.".format(len(notFoundList)))
+        if len(notFoundList) != 0:
+            outfile.write("not found books are\n" + ", ".join((x + "\n") for x in notFoundList))
+        outfile.write("There are total {} books met error.".format(len(errorList)))
+        if len(errorList) != 0:
             outfile.write("error books are\n" + ", ".join((x + "\n") for x in errorList))
         outfile.write("-----------------------------------------------\n")

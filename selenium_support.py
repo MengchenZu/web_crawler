@@ -146,12 +146,12 @@ class Driver:
 
     def log_message(self, message, debug=True):
         if debug:
-            with open(self.logFile, 'a+') as outfile:
+            with open(self.logFile, 'a+', encoding="utf8") as outfile:
                 outfile.write("{}: {}\n".format(strftime('%X %x'), str(message)))
 
     def warning_message(self, item, debug=True):
         if debug:
-            with open(self.logFile, 'a+') as outfile:
+            with open(self.logFile, 'a+', encoding="utf8") as outfile:
                 outfile.write("{}: Warning: {} is not found.\n".format(strftime('%X %x'), str(item)))
 
     def create_directory(self, path):
@@ -166,5 +166,3 @@ class Driver:
             self.log_message("Warning: the directory of '{}' has already exists.".format(path))
             self.log_message("Create a new directory: {}".format(newPath))
             return newPath
-
-

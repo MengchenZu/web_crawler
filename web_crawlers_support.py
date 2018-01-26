@@ -361,10 +361,16 @@ def rating_details_script(rating_script):
         "span> rating")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
     allEdition['reviews'] = allEditionSentence.split("span> rating")[1].split(
         "span> review")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
-    allEdition['addedBy'] = allEditionSentence.split("span> review")[1].split(
-        " people,\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
-    allEdition['toReads'] = allEditionSentence.split(" people,\\n")[1].split(
-        " to-reads\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
+    try:
+        allEdition['addedBy'] = allEditionSentence.split("span> review")[1].split(
+            " people,\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
+        allEdition['toReads'] = allEditionSentence.split(" people,\\n")[1].split(
+            " to-reads\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
+    except:
+        allEdition['addedBy'] = allEditionSentence.split("span> review")[1].split(
+            " person,\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
+        allEdition['toReads'] = allEditionSentence.split(" person,\\n")[1].split(
+            " to-reads\\n")[0].split("<span class=\\\"value\\\">")[1].split("<\/span>")[0]
     ratingDetails['allEdition'] = allEdition
 
     # this edition part
