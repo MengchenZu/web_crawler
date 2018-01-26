@@ -95,8 +95,9 @@ class Crawler (threading.Thread):
             assert False, "We didn't find any results with this book title."
 
         if not bookTitle.isdigit():
-            self.driver.driver_wait("//table[@class='tableList']//a[@class='bookTitle']")
-            self.driver.click_element("//table[@class='tableList']//a[@class='bookTitle']")
+            if self.driver.exist_element("//table[@class='tableList']//a[@class='bookTitle']"):
+                self.driver.driver_wait("//table[@class='tableList']//a[@class='bookTitle']")
+                self.driver.click_element("//table[@class='tableList']//a[@class='bookTitle']")
         sleep(1)
         bookMainUrl = self.driver.current_url()
 
