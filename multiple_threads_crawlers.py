@@ -92,11 +92,11 @@ def multiple_threads_crawlers(
     with open(mainLogFile, 'a+') as outfile:
         outfile.write("-----------------------------------------------\n")
         outfile.write("end at: {}\n".format(strftime('%X %x')))
-        outfile.write("We have searched {}".format(len(bookTitles)))
-        outfile.write("There are total {} books we didn't found.".format(len(notFoundList)))
+        outfile.write("We have searched {} elements\n".format(len(bookTitles)))
+        outfile.write("There are total {} books we didn't found.\n".format(len(notFoundList)))
         if len(notFoundList) != 0:
-            outfile.write("not found books are\n" + ", ".join((x + "\n") for x in notFoundList))
+            outfile.write("The books we didn't found are\n" + ", ".join((x + "\n") for x in notFoundList))
         outfile.write("There are total {} books met error.".format(len(errorList)))
         if len(errorList) != 0:
-            outfile.write("error books are\n" + ", ".join((x + "\n") for x in errorList))
+            outfile.write("The books met error when searching are\n" + ", ".join((x + "\n") for x in errorList))
         outfile.write("-----------------------------------------------\n")
