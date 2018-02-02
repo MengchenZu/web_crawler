@@ -4,21 +4,33 @@ from time import *
 import json
 
 
-def get_reviews(driver, reviewUrl, bookDirectory, num, debug=True, showMissing=False):
+def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, debug=True, showMissing=False):
     driver.open_browser(reviewUrl)
     driver.scroll_to_top()
 
     jsonData = {}
+
+    # unique ID
+    if driver.exist_element("//span[@class='reviewer']/a[@class='userReview']"):
+        temporatyID = driver.find_element("//span[@class='reviewer']/a[@class='userReview']").get_attribute("href")
+        jsonData['ID'] = str(temporatyID).split("/user/show/")[1]
+    else:
+        jsonData['ID'] = ""
+        driver.warning_message("ID", showMissing)
+    if showMissing:
+        driver.log_message(jsonData['ID'])
+    fileName = bookDirectory + "/" + remove_invalid_characters_from_filename(
+        jsonData['ID'][:25]) + ".json"
+
+    if jsonData['ID'] in reviewerDict:
+        return None
+
     # reviewer name
     if driver.exist_element("//span[@class='reviewer']/a[@class='userReview']"):
         jsonData['reviewerName'] = driver.find_element("//span[@class='reviewer']/a[@class='userReview']").text
     else:
         jsonData['reviewerName'] = ""
         driver.warning_message("reviewerName", showMissing)
-    if showMissing:
-        driver.log_message(jsonData['reviewerName'])
-    fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
-        jsonData['reviewerName'][:25]) + ".json"
 
     # review publish date
     if driver.exist_element("//div[@class='right dtreviewed greyText smallText']/span[@itemprop='publishDate']"):
@@ -45,7 +57,6 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, debug=True, showMissing=F
         driver.warning_message("reviewReadingPeriod", showMissing)
 
     # review content
-    # TODO: add image source link as an another component after review content
     if driver.exist_element("//div[@itemprop='reviewBody']"):
         jsonData['reviewContent'] = driver.find_element("//div[@itemprop='reviewBody']").text
     else:
@@ -60,31 +71,33 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, debug=True, showMissing=F
 
     # read progresses
     jsonData['reviewReadProgressList'] = []
-    if driver.exist_element("//div[@class='bigBoxBody']/div/table/tbody/tr[contains(@class,'_status')]"):
-        reviewProgressEles = \
-            driver.find_elements("//div[@class='bigBoxBody']/div/table/tbody/tr[contains(@class,'_status')]")
-        for reviewProgressEle in reviewProgressEles:
-            reviewDateStatus = {}
-            # review progress date
-            if driver.exist_element(".//td[@class='greyText']/a[@class='greyText']", reviewProgressEle):
-                reviewDateStatus['reviewProgressDate'] = \
-                    driver.find_element(".//td[@class='greyText']/a[@class='greyText']", reviewProgressEle).text
+    if driver.exist_element("//div[@class='readingTimeline']/div[@class='readingTimeline__row']"):
+        reviewReadProgressEles = driver.find_elements(
+            "//div[@class='readingTimeline']/div[@class='readingTimeline__row']")
+        for reviewReadProgressEle in reviewReadProgressEles:
+            # get the date and base status
+            if driver.exist_element(".//div[@class='readingTimeline__text']", reviewReadProgressEle):
+                part1 = driver.find_element(".//div[@class='readingTimeline__text']", reviewReadProgressEle).text
             else:
-                reviewDateStatus['reviewProgressDate'] = ""
-                driver.warning_message("reviewProgressDate", showMissing)
+                part1 = ""
+                driver.warning_message("one of reviewReadProgressEle date and base status", showMissing)
 
-            # review progress status
-            if driver.exist_element(".//td[@colspan='2']", reviewProgressEle):
-                reviewDateStatus['reviewProgressStatus'] = \
-                    driver.find_element(".//td[@colspan='2']", reviewProgressEle).text
-            elif driver.exist_element(".//td[contains(text(),'%')]", reviewProgressEle):
-                reviewDateStatus['reviewProgressStatus'] = \
-                    driver.find_element(".//td[contains(text(),'%')]", reviewProgressEle).text
+            # get the specified status
+            if driver.exist_element(".//div[@class='readingTimeline__text']/a", reviewReadProgressEle):
+                part2 = driver.find_element(".//div[@class='readingTimeline__text']/a", reviewReadProgressEle).text
             else:
-                reviewDateStatus['reviewProgressStatus'] = ""
-                driver.warning_message("reviewProgressStatus", showMissing)
+                part2 = ""
+                driver.warning_message("one of reviewReadProgressEle specified status", showMissing)
 
-            jsonData['reviewReadProgressList'].append(reviewDateStatus)
+            # get the progress bar data
+            if driver.exist_element(".//div[@class='readingTimeline__text']/span", reviewReadProgressEle):
+                part3 = driver.find_element(".//div[@class='readingTimeline__text']/span", reviewReadProgressEle).text
+            else:
+                part3 = ""
+                driver.warning_message("one of reviewReadProgressEle progress bar data", showMissing)
+
+            reviewReadProgress = str(part1) + str(part2) + str(part3)
+            jsonData['reviewReadProgressList'].append(reviewReadProgress)
     else:
         driver.warning_message("reviewProgressEle", showMissing)
 
@@ -94,9 +107,26 @@ def get_reviews(driver, reviewUrl, bookDirectory, num, debug=True, showMissing=F
     with open(fileName, 'w+', encoding="utf8") as outfile:
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
+    return jsonData['ID']
 
-def get_short_reviews(driver, reviewShortEle, bookDirectory, num, showMissing=False):
+
+def get_short_reviews(driver, reviewerDict, reviewShortEle, bookDirectory, showMissing=False):
     jsonData = {}
+
+    if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", reviewShortEle):
+        temporatyID = driver.find_element(
+            ".//span[@itemprop='author']/a[@class='user']", reviewShortEle).get_attribute("href")
+        jsonData['ID'] = str(temporatyID).split("/user/show/")[1]
+    else:
+        jsonData['ID'] = ""
+        driver.warning_message("ID", showMissing)
+    if showMissing:
+        driver.log_message(jsonData['ID'])
+    fileName = bookDirectory + "/" + remove_invalid_characters_from_filename(
+        jsonData['ID'][:25]).replace(" ", "_") + ".json"
+
+    if jsonData['ID'] in reviewerDict:
+        return None
 
     # reviewer name
     if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", reviewShortEle):
@@ -105,10 +135,6 @@ def get_short_reviews(driver, reviewShortEle, bookDirectory, num, showMissing=Fa
     else:
         jsonData['reviewerName'] = ""
         driver.warning_message("reviewerName", showMissing)
-    if showMissing:
-        driver.log_message(jsonData['reviewerName'])
-    fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
-        jsonData['reviewerName'][:25]).replace(" ", "_") + ".json"
 
     # review publish date
     if driver.exist_element(
@@ -145,9 +171,26 @@ def get_short_reviews(driver, reviewShortEle, bookDirectory, num, showMissing=Fa
     with open(fileName, 'w+', encoding="utf8") as outfile:
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
+    return jsonData['ID']
 
-def get_ratings(driver, ratingEle, bookDirectory, num, showMissing=False):
+
+def get_ratings(driver, reviewerDict, ratingEle, bookDirectory, showMissing=False):
     jsonData = {}
+
+    if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", ratingEle):
+        temporatyID = driver.find_element(
+            ".//span[@itemprop='author']/a[@class='user']", ratingEle).get_attribute("href")
+        jsonData['ID'] = str(temporatyID).split("/user/show/")[1]
+    else:
+        jsonData['ID'] = ""
+        driver.warning_message("ID", showMissing)
+    if showMissing:
+        driver.log_message(jsonData['ID'])
+    fileName = bookDirectory + "/" + remove_invalid_characters_from_filename(
+        jsonData['ID'][:25]).replace(" ", "_") + ".json"
+
+    if jsonData['ID'] in reviewerDict:
+        return None
 
     # reviewer name
     if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", ratingEle):
@@ -155,10 +198,6 @@ def get_ratings(driver, ratingEle, bookDirectory, num, showMissing=False):
     else:
         jsonData['reviewerName'] = ""
         driver.warning_message("reviewerName", showMissing)
-    if showMissing:
-        driver.log_message(jsonData['reviewerName'])
-    fileName = bookDirectory + "/" + str(num) + "_" + remove_invalid_characters_from_filename(
-        jsonData['reviewerName'][:25]).replace(" ", "_") + ".json"
 
     # review publish date
     if driver.exist_element(".//div[@class='reviewHeader uitext stacked']/a[@class='reviewDate']", ratingEle):
@@ -178,6 +217,8 @@ def get_ratings(driver, ratingEle, bookDirectory, num, showMissing=False):
 
     with open(fileName, 'w+', encoding="utf8") as outfile:
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
+
+    return jsonData['ID']
 
 
 def comments_within_reviews(driver, url, debug=True, showMissing=False):
@@ -403,38 +444,78 @@ def remove_invalid_characters_from_filename(filename):
     return filename
 
 
-def filter_by_number_of_stars(driver, numOfStars, bookMainUrl, debug=True):
+def filter_and_sort(driver, numOfStars, sortType, bookMainUrl, debug=True):
     count = 0
     while True:
         count = count + 1
         if count > 10:
-            driver.log_message("Fail to filter by number of stars over 10 times.", debug)
-            assert False, "Fail to filter by number of stars over 10 times."
+            driver.log_message("Fail to filter by {} stars and sort by {} over 10 times.".format(numOfStars, sortType),
+                               debug)
+            assert False, "Fail to filter by {} stars and sort by {} over 10 times.".format(numOfStars, sortType)
         sleep(3)
-        driver.click_element("//span[contains(text(), 'Filter')]")
-        if not driver.in_the_right_page(bookMainUrl):
-            driver.log_message("Fail to click 'Filter'. Not in the correct page.", debug)
-        sleep(1.5)
-        driver.driver_wait(
-            "//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]".format(numOfStars))
+
         try:
-            driver.click_element("//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]"
-                                 .format(numOfStars), inActionChain=True)
-            if not driver.in_the_right_page(bookMainUrl):
-                driver.log_message("Fail to click 'the stars' in the 'Filter'. Not in the correct page.", debug)
-        except Exception as exception:
-            driver.log_message("fail to click the stars filter.")
-            driver.log_message(exception)
-        sleep(5)
-        if check_num_of_star(driver, numOfStars):
-            driver.log_message("success filter with {} stars.".format(numOfStars))
+            filter_by_number_of_stars(driver, numOfStars, bookMainUrl, debug)
+            sleep(3)
+            if not sortType == "Default":
+                sort_by_date(driver, sortType, bookMainUrl, debug)
+            driver.log_message("success filter by {} stars and sort by {}".format(numOfStars, sortType))
             return
-        driver.log_message("fail to filter with {} stars.".format(numOfStars))
-        driver.refresh()
-        sleep(30)
+        except Exception as exception:
+            driver.log_message("fail to filter with {} stars and sort by {}.".format(numOfStars, sortType), debug)
+            driver.log_message(exception, debug)
+            if "Not in the correct page." in str(exception):
+                driver.open_browser(bookMainUrl)
+            else:
+                driver.refresh()
+            sleep(10)
 
 
-def check_num_of_star(driver, numOfStar):
+def filter_by_number_of_stars(driver, numOfStars, bookMainUrl, debug=True):
+    driver.scroll_to_top()
+    driver.click_element("//span[contains(text(), 'Filter')]")
+    if not driver.in_the_right_page(bookMainUrl):
+        assert False, "Fail to click 'Filter'. Not in the correct page."
+    sleep(1.5)
+    driver.driver_wait("//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]".format(numOfStars))
+    try:
+        driver.click_element("//a[@class='actionLinkLite loadingLink' and contains(text(), '{} star')]"
+                             .format(numOfStars), inActionChain=True)
+        if not driver.in_the_right_page(bookMainUrl):
+            assert False, "Fail to click 'the stars' in the 'Filter'. Not in the correct page."
+    except Exception as exception:
+        driver.log_message(exception, debug)
+        assert False, "fail to click the stars filter."
+    sleep(5)
+    if check_num_of_star(driver, numOfStars, debug):
+        driver.log_message("success filter with {} stars.".format(numOfStars), debug)
+    else:
+        assert False, "fail to filter with {} stars.".format(numOfStars)
+
+
+def sort_by_date(driver, sortType, bookMainUrl, debug=True):
+    driver.scroll_to_top()
+    driver.click_element("//span[contains(text(), 'Sort')]")
+    if not driver.in_the_right_page(bookMainUrl):
+        assert False, "Fail to click 'Sort'. Not in the correct page."
+    sleep(1.5)
+    driver.driver_wait("//a[contains(text(), '{}')]".format(sortType))
+    try:
+        driver.click_element("//a[contains(text(), '{}')]"
+                             .format(sortType), inActionChain=True)
+        if not driver.in_the_right_page(bookMainUrl):
+            assert False, "Fail to click '{}' in the 'Sort'. Not in the correct page.".format(sortType)
+    except Exception as exception:
+        driver.log_message(exception, debug)
+        assert False, "fail to click the date sorter."
+    sleep(5)
+    if check_sorted_date(driver, sortType, debug):
+        driver.log_message("success sort by {}.".format(sortType), debug)
+    else:
+        assert False, "fail to sort by {}.".format(sortType)
+
+
+def check_num_of_star(driver, numOfStar, debug=True):
     sleep(2)
     stars = []
 
@@ -449,7 +530,7 @@ def check_num_of_star(driver, numOfStar):
         if driver.exist_element("//div[@class='friendReviews elementListBrown']"):
             driver.driver_wait("//div[@class='friendReviews elementListBrown']")
             reviewEles = driver.find_elements("//div[@class='friendReviews elementListBrown']")
-            driver.log_message("There are {} reviews after filter with stars.".format(len(reviewEles)))
+            driver.log_message("There are {} reviews after filter with stars.".format(len(reviewEles)), debug)
 
         for reviewEle in reviewEles:
             stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
@@ -460,7 +541,7 @@ def check_num_of_star(driver, numOfStar):
             if driver.exist_element("//div[@class='friendReviews elementListBrown']"):
                 driver.driver_wait("//div[@class='friendReviews elementListBrown']")
                 reviewEles = driver.find_elements("//div[@class='friendReviews elementListBrown']")
-                driver.log_message("There are {} reviews after filter with stars.".format(len(reviewEles)))
+                driver.log_message("There are {} reviews after filter with stars.".format(len(reviewEles)), debug)
 
             for reviewEle in reviewEles:
                 stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
@@ -472,7 +553,7 @@ def check_num_of_star(driver, numOfStar):
         if driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
             driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
             ratingEles = driver.find_elements("//div[@class='friendReviews elementListBrown notext']")
-            driver.log_message("There are {} ratings after filter with stars.".format(len(ratingEles)))
+            driver.log_message("There are {} ratings after filter with stars.".format(len(ratingEles)), debug)
 
         for ratingEle in ratingEles:
             stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
@@ -483,16 +564,143 @@ def check_num_of_star(driver, numOfStar):
             if driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
                 driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
                 ratingEles = driver.find_elements("//div[@class='friendReviews elementListBrown notext']")
-                driver.log_message("There are {} ratings after filter with stars.".format(len(ratingEles)))
+                driver.log_message("There are {} ratings after filter with stars.".format(len(ratingEles)), debug)
 
             for ratingEle in ratingEles:
                 stars.append(len(driver.find_elements(".//span[@class=' staticStars']/span[@class='staticStar p10']",
                                                       ratingEle)))
 
-    driver.log_message("The stars are " + ", ".join(str(x) for x in stars))
+    driver.log_message("The stars are " + ", ".join(str(x) for x in stars), debug)
 
     for star in stars:
         if not str(star) == str(numOfStar):
             return False
 
     return True
+
+
+def check_sorted_date(driver, sortType, debug=True):
+    sleep(2)
+    reviewDates = []
+    ratingDates = []
+
+    # get review elements
+    try:
+        reviewEles = []
+        if driver.exist_element("//div[@class='friendReviews elementListBrown']"):
+            driver.driver_wait("//div[@class='friendReviews elementListBrown']")
+            reviewEles = driver.find_elements("//div[@class='friendReviews elementListBrown']")
+            driver.log_message("There are {} reviews after sort by {}.".format(len(reviewEles), sortType), debug)
+
+        for reviewEle in reviewEles:
+            reviewDates.append(driver.find_elements(".//a[@class='reviewDate createdAt right']",
+                                                    reviewEle).text)
+    except Exception as exception:
+        if "element is not attached to the page document" in exception.__str__():
+            reviewEles = []
+            if driver.exist_element("//div[@class='friendReviews elementListBrown']"):
+                driver.driver_wait("//div[@class='friendReviews elementListBrown']")
+                reviewEles = driver.find_elements("//div[@class='friendReviews elementListBrown']")
+                driver.log_message("There are {} reviews after sort by {}.".format(len(reviewEles), sortType), debug)
+
+            for reviewEle in reviewEles:
+                reviewDates.append(driver.find_elements(".//a[@class='reviewDate createdAt right']",
+                                                        reviewEle).text)
+
+    # get rating elements
+    try:
+        ratingEles = []
+        if driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
+            driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
+            ratingEles = driver.find_elements("//div[@class='friendReviews elementListBrown notext']")
+            driver.log_message("There are {} ratings after sort by {}.".format(len(ratingEles), sortType), debug)
+
+        for ratingEle in ratingEles:
+            ratingDates.append(driver.find_elements(".//a[@class='reviewDate']",
+                                                    ratingEle).text)
+    except Exception as exception:
+        if "element is not attached to the page document" in exception.__str__():
+            ratingEles = []
+            if driver.exist_element("//div[@class='friendReviews elementListBrown notext']"):
+                driver.driver_wait("//div[@class='friendReviews elementListBrown notext']")
+                ratingEles = driver.find_elements("//div[@class='friendReviews elementListBrown notext']")
+                driver.log_message("There are {} ratings after sort by {}.".format(len(ratingEles), sortType), debug)
+
+            for ratingEle in ratingEles:
+                ratingDates.append(driver.find_elements(".//a[@class='reviewDate']",
+                                                        ratingEle).text)
+
+    driver.log_message("Before the date rename.", debug)
+    driver.log_message("The review dates are " + ", ".join(str(x) for x in reviewDates), debug)
+    driver.log_message("The rating dates are " + ", ".join(str(x) for x in ratingDates), debug)
+
+    reviewDates = rename_list(reviewDates)
+    ratingDates = rename_list(ratingDates)
+
+    driver.log_message("After the date rename.", debug)
+    driver.log_message("The review dates are " + ", ".join(str(x) for x in reviewDates), debug)
+    driver.log_message("The rating dates are " + ", ".join(str(x) for x in ratingDates), debug)
+
+    # check for review dates
+    if len(reviewDates) == 1 or len(reviewDates) == 0:
+        reviewFlag = True
+    else:
+        reviewDatesIsAscent = check_ascent(reviewDates)
+        reviewDatesIsDescent = check_descent(reviewDates)
+        if sortType == "Default":
+            reviewFlag = True
+        elif sortType == "Newest" and reviewDatesIsDescent and not reviewDatesIsAscent:
+            reviewFlag = True
+        elif sortType == "Oldest" and reviewDatesIsAscent and not reviewDatesIsDescent:
+            reviewFlag = True
+        else:
+            reviewFlag = False
+
+    # check for rating dates
+    if len(ratingDates) == 1 or len(ratingDates) == 0:
+        ratingFlag = True
+    else:
+        ratingDatesIsAscent = check_ascent(ratingDates)
+        ratingDatesIsDescent = check_descent(ratingDates)
+        if sortType == "Default":
+            ratingFlag = True
+        elif sortType == "Newest" and ratingDatesIsDescent and not ratingDatesIsAscent:
+            ratingFlag = True
+        elif sortType == "Oldest" and ratingDatesIsAscent and not ratingDatesIsDescent:
+            ratingFlag = True
+        else:
+            ratingFlag = False
+
+    if reviewFlag and ratingFlag:
+        return True
+
+    return False
+
+
+def rename_list(dateList):
+    newList = []
+    for date in dateList:
+        newList.append(rename_date(str(date)))
+    return newList
+
+
+def rename_date(string):
+    monthDict = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10,
+                 'Nov': 11, 'Dec': 12}
+    date = string.split(" ")[1].split(",")[0]
+    month = monthDict['{}'.format(string.split(" ")[0])]
+    year = string.split(" ")[2]
+
+    return int(year) * 10000 + int(month) * 100 + int(date) * 100
+
+
+def check_ascent(dateList):
+    if sorted(dateList) == dateList:
+        return True
+    return False
+
+
+def check_descent(dateList):
+    if sorted(dateList).reverse() == dateList:
+        return True
+    return False

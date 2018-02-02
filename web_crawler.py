@@ -23,6 +23,7 @@ class Crawler (threading.Thread):
         self.connectedListOutputFile = "00_connected_list.json"
         self.mainLogFile = mainLogFile
         self.driver = None
+        self.reviewerDict = []
 
     def get_bookTitle(self):
         return self.bookTitle
@@ -140,15 +141,51 @@ class Crawler (threading.Thread):
         with open(self.bookDirectory + "/" + self.connectedListOutputFile, 'w+', encoding="utf8") as outfile:
             json.dump(connectedListJson, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
+        # when total reviews are less than 300, don't filter with stars
+        # when reviews in each star are less than 300, don't sort
+        # The GoodReads can only show first 10 pages and 30 reviews or ratings in each page
+        maxShownRatings = 10 * 30
+        if ratingJSON["ratings"]["fiveStarNum"] + ratingJSON["ratings"]["fourStarNum"] + \
+                ratingJSON["ratings"]["threeStarNum"] + ratingJSON["ratings"]["twoStarNum"] + \
+                ratingJSON["ratings"]["oneStarNum"] <= maxShownRatings:
+            skipFilterByStars = True
+        else:
+            skipFilterByStars = False
+
+        starDateTupleList = []
+        if skipFilterByStars:
+            starDateTupleList = [(0, "Default")]
+        else:
+            if ratingJSON["ratings"]["fiveStarNum"] < maxShownRatings:
+                starDateTupleList.append((5, "Default"))
+            else:
+                starDateTupleList.extend([(5, "Default"), (5, "Newest"), (5, "Oldest")])
+            if ratingJSON["ratings"]["fourStarNum"] < maxShownRatings:
+                starDateTupleList.append((4, "Default"))
+            else:
+                starDateTupleList.extend([(4, "Default"), (4, "Newest"), (4, "Oldest")])
+            if ratingJSON["ratings"]["threeStarNum"] < maxShownRatings:
+                starDateTupleList.append((3, "Default"))
+            else:
+                starDateTupleList.extend([(3, "Default"), (3, "Newest"), (3, "Oldest")])
+            if ratingJSON["ratings"]["twoStarNum"] < maxShownRatings:
+                starDateTupleList.append((2, "Default"))
+            else:
+                starDateTupleList.extend([(2, "Default"), (2, "Newest"), (2, "Oldest")])
+            if ratingJSON["ratings"]["oneStarNum"] < maxShownRatings:
+                starDateTupleList.append((1, "Default"))
+            else:
+                starDateTupleList.extend([(1, "Default"), (1, "Newest"), (1, "Oldest")])
+
         # we can only view the first 10 pages of reviews in Goodreads
         # to get more reviews, we filter from 5 stars to 1 star
-        starsList = [5, 4, 3, 2, 1]
         num = 0
-        for numOfStar in starsList:
+        print(self.bookDirectory + ", ".join(str(x) for x in starDateTupleList))
+        for starDateTuple in starDateTupleList:
             self.driver.open_browser(bookMainUrl)
-            self.driver.scroll_to_top()
-            filter_by_number_of_stars(self.driver, numOfStar, bookMainUrl, self.debug)
-            sleep(5)
+            if not starDateTuple[0] == 0:
+                filter_and_sort(self.driver, starDateTuple[0], starDateTuple[1], bookMainUrl, self.debug)
+            sleep(1)
 
             # get all the long reviews' urls
             if self.verbose:
@@ -196,8 +233,11 @@ class Crawler (threading.Thread):
                     self.driver.log_message("We got {} reviews on this page.".format(
                         len(reviewShortEles)), self.debug)
                     for reviewShortEle in reviewShortEles:
-                        num = num + 1
-                        get_short_reviews(self.driver, reviewShortEle, self.bookDirectory, num, self.showMissing)
+                        ID = get_short_reviews(self.driver, self.reviewerDict, reviewShortEle, self.bookDirectory,
+                                               self.showMissing)
+                        if ID is not None:
+                            num = num + 1
+                            self.reviewerDict.append(ID)
 
                 # start to get the reviews and ratings without reviews
                 # get the ratings
@@ -215,8 +255,10 @@ class Crawler (threading.Thread):
                 self.driver.log_message("We got {} ratings (and special reviews) on this page.".format(
                     len(ratingEles)), self.debug)
                 for ratingEle in ratingEles:
-                    num = num + 1
-                    get_ratings(self.driver, ratingEle, self.bookDirectory, num, self.showMissing)
+                    ID = get_ratings(self.driver, self.reviewerDict, ratingEle, self.bookDirectory, self.showMissing)
+                    if ID is not None:
+                        num = num + 1
+                        self.reviewerDict.append(ID)
 
                 # go to next page until the last page or page 10
                 if self.driver.exist_element("//em[@class='current']"):
@@ -287,15 +329,20 @@ class Crawler (threading.Thread):
                         self.driver.log_message("break at last page", self.debug)
                     break
 
-            self.driver.log_message("After {} stars ratings, we have totally {}.".format(numOfStar, num), self.debug)
+            self.driver.log_message("After {} stars ratings, we have totally {}.".format(starDateTuple[0], num),
+                                    self.debug)
 
             # if verbose, get the review details
             if self.verbose:
                 for reviewUrl in reviewUrls:
-                    num = num + 1
-                    get_reviews(self.driver, reviewUrl, self.bookDirectory, num, self.debug, self.showMissing)
+                    ID = get_reviews(self.driver, self.reviewerDict, reviewUrl, self.bookDirectory, self.debug,
+                                     self.showMissing)
+
+                    if ID is not None:
+                        num = num + 1
+                        self.reviewerDict.append(ID)
 
             self.driver.log_message("{}: After {} stars reviews, we have totally {}.".format(
-                self.bookTitle, numOfStar, num), self.debug)
+                self.bookTitle, starDateTuple[0], num), self.debug)
 
         self.driver.close_browser()

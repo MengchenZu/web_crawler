@@ -89,6 +89,38 @@ def multiple_threads_crawlers(
     for c in crawlers:
         c.join()
 
+    for i in range(0, numOfCrawler):
+        if crawlers[i].get_error():
+            if "We didn't find any results with this book title." in crawlers[i].get_errorMessage():
+                print(crawlers[i].get_bookTitle() + " wasn't found.")
+                notFoundList.append(crawlers[i].get_bookTitle())
+                with open(notFoundBooksFile, 'a+', encoding="utf8") as f:
+                    f.write(crawlers[i].get_bookTitle() + "\n")
+                with open(mainLogFile, 'a+') as outfile:
+                    outfile.write("***********************************************\n")
+                    outfile.write("{}: {} wasn't found.\n".format(strftime(
+                        '%X %x'), crawlers[i].get_bookTitle()))
+                    outfile.write("***********************************************\n")
+                crawlers[i].stop()
+                crawlers[i].close_browser()
+                crawlers[i].set_error(False)
+                crawlers[i].set_errorMessage("")
+            else:
+                print(crawlers[i].get_bookTitle() + " got error.")
+                errorList.append(crawlers[i].get_bookTitle())
+                with open(errorBooksFile, 'a+', encoding="utf8") as f:
+                    f.write(crawlers[i].get_bookTitle() + " store in " +
+                            crawlers[i].get_bookDirectory() + "\n")
+                with open(mainLogFile, 'a+') as outfile:
+                    outfile.write("###############################################\n")
+                    outfile.write("{}: {} got Error.\n".format(strftime(
+                        '%X %x'), crawlers[i].get_bookTitle()))
+                    outfile.write("###############################################\n")
+                crawlers[i].stop()
+                crawlers[i].close_browser()
+                crawlers[i].set_error(False)
+                crawlers[i].set_errorMessage("")
+
     with open(mainLogFile, 'a+') as outfile:
         outfile.write("-----------------------------------------------\n")
         outfile.write("end at: {}\n".format(strftime('%X %x')))
