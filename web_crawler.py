@@ -23,7 +23,7 @@ class Crawler (threading.Thread):
         self.connectedListOutputFile = "00_connected_list.json"
         self.mainLogFile = mainLogFile
         self.driver = None
-        self.reviewerDict = []
+        self.reviewerList = []
 
     def get_bookTitle(self):
         return self.bookTitle
@@ -64,6 +64,9 @@ class Crawler (threading.Thread):
             self.set_complete(True)
         except Exception as exception:
             self.driver.log_message("{}: got error.".format(self.bookTitle), self.debug)
+            screenshotPath = self.bookDirectory + "/0_screenshot.png"
+            self.driver.screenshot(screenshotPath)
+            self.driver.log_message("{}: saved screenshot at {}.".format(self.bookTitle, screenshotPath), self.debug)
             self.driver.log_message(exception)
             self.set_error(True)
             self.errorMessage = str(exception)
@@ -180,9 +183,17 @@ class Crawler (threading.Thread):
         # we can only view the first 10 pages of reviews in Goodreads
         # to get more reviews, we filter from 5 stars to 1 star
         num = 0
-        print(self.bookDirectory + ", ".join(str(x) for x in starDateTupleList))
+        lastStar = 6
         for starDateTuple in starDateTupleList:
             self.driver.open_browser(bookMainUrl)
+
+            # clear reviewerList when we move to another star filter
+            # reviewerList is used to avoid duplicated reviewer sorting with "Default", "Oldest" and "Newest"
+            thisStar = starDateTuple[0]
+            if thisStar != lastStar:
+                self.reviewerList = []
+            lastStar = thisStar
+
             if not starDateTuple[0] == 0:
                 filter_and_sort(self.driver, starDateTuple[0], starDateTuple[1], bookMainUrl, self.debug)
             sleep(1)
@@ -233,11 +244,11 @@ class Crawler (threading.Thread):
                     self.driver.log_message("We got {} reviews on this page.".format(
                         len(reviewShortEles)), self.debug)
                     for reviewShortEle in reviewShortEles:
-                        ID = get_short_reviews(self.driver, self.reviewerDict, reviewShortEle, self.bookDirectory,
-                                               self.showMissing)
+                        ID = get_short_reviews(self.driver, self.reviewerList, reviewShortEle, self.bookDirectory,
+                                               starDateTuple[1], self.showMissing)
                         if ID is not None:
                             num = num + 1
-                            self.reviewerDict.append(ID)
+                            self.reviewerList.append(ID)
 
                 # start to get the reviews and ratings without reviews
                 # get the ratings
@@ -255,10 +266,11 @@ class Crawler (threading.Thread):
                 self.driver.log_message("We got {} ratings (and special reviews) on this page.".format(
                     len(ratingEles)), self.debug)
                 for ratingEle in ratingEles:
-                    ID = get_ratings(self.driver, self.reviewerDict, ratingEle, self.bookDirectory, self.showMissing)
+                    ID = get_ratings(self.driver, self.reviewerList, ratingEle, self.bookDirectory, starDateTuple[1],
+                                     self.showMissing)
                     if ID is not None:
                         num = num + 1
-                        self.reviewerDict.append(ID)
+                        self.reviewerList.append(ID)
 
                 # go to next page until the last page or page 10
                 if self.driver.exist_element("//em[@class='current']"):
@@ -335,12 +347,12 @@ class Crawler (threading.Thread):
             # if verbose, get the review details
             if self.verbose:
                 for reviewUrl in reviewUrls:
-                    ID = get_reviews(self.driver, self.reviewerDict, reviewUrl, self.bookDirectory, self.debug,
-                                     self.showMissing)
+                    ID = get_reviews(self.driver, self.reviewerList, reviewUrl, self.bookDirectory, starDateTuple[1],
+                                     self.debug, self.showMissing)
 
                     if ID is not None:
                         num = num + 1
-                        self.reviewerDict.append(ID)
+                        self.reviewerList.append(ID)
 
             self.driver.log_message("{}: After {} stars reviews, we have totally {}.".format(
                 self.bookTitle, starDateTuple[0], num), self.debug)

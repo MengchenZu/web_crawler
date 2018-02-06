@@ -4,7 +4,7 @@ from time import *
 import json
 
 
-def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, debug=True, showMissing=False):
+def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=True, showMissing=False):
     driver.open_browser(reviewUrl)
     driver.scroll_to_top()
 
@@ -22,8 +22,9 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, debug=True, show
     fileName = bookDirectory + "/" + remove_invalid_characters_from_filename(
         jsonData['ID'][:25]) + ".json"
 
-    if jsonData['ID'] in reviewerDict:
-        return None
+    if not sortType == "Default":
+        if jsonData['ID'] in reviewerDict:
+            return None
 
     # reviewer name
     if driver.exist_element("//span[@class='reviewer']/a[@class='userReview']"):
@@ -110,7 +111,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, debug=True, show
     return jsonData['ID']
 
 
-def get_short_reviews(driver, reviewerDict, reviewShortEle, bookDirectory, showMissing=False):
+def get_short_reviews(driver, reviewerDict, reviewShortEle, bookDirectory, sortType, showMissing=False):
     jsonData = {}
 
     if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", reviewShortEle):
@@ -125,8 +126,9 @@ def get_short_reviews(driver, reviewerDict, reviewShortEle, bookDirectory, showM
     fileName = bookDirectory + "/" + remove_invalid_characters_from_filename(
         jsonData['ID'][:25]).replace(" ", "_") + ".json"
 
-    if jsonData['ID'] in reviewerDict:
-        return None
+    if not sortType == "Default":
+        if jsonData['ID'] in reviewerDict:
+            return None
 
     # reviewer name
     if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", reviewShortEle):
@@ -174,7 +176,7 @@ def get_short_reviews(driver, reviewerDict, reviewShortEle, bookDirectory, showM
     return jsonData['ID']
 
 
-def get_ratings(driver, reviewerDict, ratingEle, bookDirectory, showMissing=False):
+def get_ratings(driver, reviewerDict, ratingEle, bookDirectory, sortType, showMissing=False):
     jsonData = {}
 
     if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", ratingEle):
@@ -189,8 +191,9 @@ def get_ratings(driver, reviewerDict, ratingEle, bookDirectory, showMissing=Fals
     fileName = bookDirectory + "/" + remove_invalid_characters_from_filename(
         jsonData['ID'][:25]).replace(" ", "_") + ".json"
 
-    if jsonData['ID'] in reviewerDict:
-        return None
+    if not sortType == "Default":
+        if jsonData['ID'] in reviewerDict:
+            return None
 
     # reviewer name
     if driver.exist_element(".//span[@itemprop='author']/a[@class='user']", ratingEle):
