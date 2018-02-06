@@ -64,9 +64,9 @@ class Crawler (threading.Thread):
             self.set_complete(True)
         except Exception as exception:
             self.driver.log_message("{}: got error.".format(self.bookTitle), self.debug)
-            screenshotPath = self.bookDirectory + "/0_screenshot.png"
-            self.driver.screenshot(screenshotPath)
-            self.driver.log_message("{}: saved screenshot at {}.".format(self.bookTitle, screenshotPath), self.debug)
+            # screenshotPath = self.bookDirectory + "/0_screenshot.png"
+            # self.driver.screenshot(screenshotPath)
+            # self.driver.log_message("{}: saved screenshot at {}.".format(self.bookTitle, screenshotPath), self.debug)
             self.driver.log_message(exception)
             self.set_error(True)
             self.errorMessage = str(exception)
