@@ -12,6 +12,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
 
     # unique ID
     if driver.exist_element("//span[@class='reviewer']/a[@class='userReview']"):
+        driver.driver_wait("//span[@class='reviewer']/a[@class='userReview']")
         temporatyID = driver.find_element("//span[@class='reviewer']/a[@class='userReview']").get_attribute("href")
         jsonData['ID'] = str(temporatyID).split("/user/show/")[1]
     else:
@@ -28,6 +29,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
 
     # reviewer name
     if driver.exist_element("//span[@class='reviewer']/a[@class='userReview']"):
+        driver.driver_wait("//span[@class='reviewer']/a[@class='userReview']")
         jsonData['reviewerName'] = driver.find_element("//span[@class='reviewer']/a[@class='userReview']").text
     else:
         jsonData['reviewerName'] = ""
@@ -35,6 +37,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
 
     # review publish date
     if driver.exist_element("//div[@class='right dtreviewed greyText smallText']/span[@itemprop='publishDate']"):
+        driver.driver_wait("//div[@class='right dtreviewed greyText smallText']/span[@itemprop='publishDate']")
         jsonData['reviewPublishDate'] = driver.find_element(
             "//div[@class='right dtreviewed greyText smallText']/span[@itemprop='publishDate']").text
     else:
@@ -43,6 +46,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
 
     # review stars
     if driver.exist_element("//div[@itemprop='reviewRating']/span[@class='value-title']"):
+        driver.driver_wait("//div[@itemprop='reviewRating']/span[@class='value-title']")
         jsonData['reviewStars'] = driver.find_element("//div[@itemprop='reviewRating']/span[@class='value-title']"). \
             get_attribute("title")
     else:
@@ -51,6 +55,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
 
     # review reading period
     if driver.exist_element("//div[@class='big450BoxContent']/div/div[contains(text(),'Read')]"):
+        driver.driver_wait("//div[@class='big450BoxContent']/div/div[contains(text(),'Read')]")
         jsonData['reviewReadingPeriod'] = \
             driver.find_element("//div[@class='big450BoxContent']/div/div[contains(text(),'Read')]").text
     else:
@@ -59,6 +64,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
 
     # review content
     if driver.exist_element("//div[@itemprop='reviewBody']"):
+        driver.driver_wait("//div[@itemprop='reviewBody']")
         jsonData['reviewContent'] = driver.find_element("//div[@itemprop='reviewBody']").text
     else:
         jsonData['reviewContent'] = ""
@@ -66,6 +72,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
 
     # review likes count
     if driver.exist_element("//span[@class='likesCount']"):
+        driver.driver_wait("//span[@class='likesCount']")
         jsonData['reviewLikesCount'] = driver.find_element("//span[@class='likesCount']").text
     else:
         jsonData['reviewLikesCount'] = 0
@@ -73,6 +80,7 @@ def get_reviews(driver, reviewerDict, reviewUrl, bookDirectory, sortType, debug=
     # read progresses
     jsonData['reviewReadProgressList'] = []
     if driver.exist_element("//div[@class='readingTimeline']/div[@class='readingTimeline__row']"):
+        driver.driver_wait("//div[@class='readingTimeline']/div[@class='readingTimeline__row']")
         reviewReadProgressEles = driver.find_elements(
             "//div[@class='readingTimeline']/div[@class='readingTimeline__row']")
         for reviewReadProgressEle in reviewReadProgressEles:
@@ -218,6 +226,10 @@ def get_ratings(driver, reviewerDict, ratingEle, bookDirectory, sortType, showMi
         jsonData['reviewStars'] = ""
         driver.warning_message("reviewStars", showMissing)
 
+    # remove those ratings with only "add to read" or "start to read"
+    if jsonData['reviewStars'] == "":
+        return None
+
     with open(fileName, 'w+', encoding="utf8") as outfile:
         json.dump(jsonData, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
@@ -235,7 +247,6 @@ def comments_within_reviews(driver, url, debug=True, showMissing=False):
             assert False, "Fail to click the next page in comments over 20 times"
 
         if driver.exist_element("//div[@id='comment_list']/div[@class='comment u-anchorTarget']"):
-            driver.driver_wait("//div[@id='comment_list']/div[@class='comment u-anchorTarget']")
             commentEles = driver.find_elements("//div[@id='comment_list']/div[@class='comment u-anchorTarget']")
             for commentEle in commentEles:
                 comment = {}
