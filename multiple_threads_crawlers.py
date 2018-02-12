@@ -82,7 +82,8 @@ def multiple_threads_crawlers(
                     else:
                         with open(mainLogFile, 'a+') as outfile:
                             outfile.write("start crawl the data with crawlers[{}] from {}\n".format(i, bookTitle))
-                        crawlers[i] = Crawler(bookTitle, mainLogFile, basicDirectory, verbose, debug, showMissing)
+                        crawlers[i] = Crawler(bookTitle, mainLogFile, basicDirectory, screenshotDirectory, verbose,
+                                              debug, showMissing)
                         crawlers[i].set_complete(False)
                         crawlers[i].start()
                         breakFlag = True

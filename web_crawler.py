@@ -140,6 +140,11 @@ class Crawler (threading.Thread):
             "//div[@class='reviewControls__ratingDetails reviewControls--left rating_graph']/script").get_attribute(
             "innerHTML")
         ratingJSON = rating_details_script(rating_script)
+
+        # TODO: test why toReads sometimes is 0, delete later
+        if ratingJSON['allEdition']['toReads'] == 0:
+            self.driver.log_message(rating_script, self.debug)
+
         with open(self.bookDirectory + "/" + self.ratingOutputFile, 'w+', encoding="utf8") as outfile:
             json.dump(ratingJSON, outfile, indent=1, sort_keys=False, ensure_ascii=False)
 
