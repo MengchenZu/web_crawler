@@ -142,7 +142,7 @@ class Crawler (threading.Thread):
         ratingJSON = rating_details_script(rating_script)
 
         # TODO: test why toReads sometimes is 0, delete later
-        if ratingJSON['allEdition']['toReads'] == 0:
+        if ratingJSON['allEdition']['toReads'] == str(0):
             self.driver.log_message(rating_script, self.debug)
 
         with open(self.bookDirectory + "/" + self.ratingOutputFile, 'w+', encoding="utf8") as outfile:
