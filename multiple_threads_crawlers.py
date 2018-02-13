@@ -12,11 +12,6 @@ def multiple_threads_crawlers(
     if not os.path.exists(basicDirectory):
         os.makedirs(basicDirectory)
 
-    # create the directory for screenshot when we got error
-    screenshotDirectory = basicDirectory + "/000_screenshot"
-    if not os.path.exists(screenshotDirectory):
-        os.makedirs(screenshotDirectory)
-
     with open(mainLogFile, 'a+') as outfile:
         outfile.write("-----------------------------------------------\n")
         outfile.write("start at: {}\n".format(strftime('%X %x')))
@@ -40,7 +35,7 @@ def multiple_threads_crawlers(
     # create a list of crawlers
     crawlers = []
     for i in range(0, numOfCrawler):
-        crawler = Crawler("start", mainLogFile, basicDirectory, screenshotDirectory, verbose, debug, showMissing)
+        crawler = Crawler("start", mainLogFile, basicDirectory, verbose, debug, showMissing)
         crawlers.append(crawler)
 
     # search the book title or the ISBN
@@ -82,8 +77,7 @@ def multiple_threads_crawlers(
                     else:
                         with open(mainLogFile, 'a+') as outfile:
                             outfile.write("start crawl the data with crawlers[{}] from {}\n".format(i, bookTitle))
-                        crawlers[i] = Crawler(bookTitle, mainLogFile, basicDirectory, screenshotDirectory, verbose,
-                                              debug, showMissing)
+                        crawlers[i] = Crawler(bookTitle, mainLogFile, basicDirectory, verbose, debug, showMissing)
                         crawlers[i].set_complete(False)
                         crawlers[i].start()
                         breakFlag = True

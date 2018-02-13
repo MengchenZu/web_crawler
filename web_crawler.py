@@ -5,7 +5,7 @@ import threading
 
 
 class Crawler (threading.Thread):
-    def __init__(self, bookTitle, mainLogFile, basicDirectory, screenshotDirectory, verbose=True, debug=True,
+    def __init__(self, bookTitle, mainLogFile, basicDirectory, verbose=True, debug=True,
                  showMissing=False):
         threading.Thread.__init__(self)
         super(Crawler, self).__init__()
@@ -23,7 +23,6 @@ class Crawler (threading.Thread):
         self.ratingOutputFile = "0_rating_details.json"
         self.connectedListOutputFile = "00_connected_list.json"
         self.mainLogFile = mainLogFile
-        self.screenshotDirectory = screenshotDirectory
         self.driver = None
         self.reviewerList = []
 
@@ -66,11 +65,6 @@ class Crawler (threading.Thread):
             self.set_complete(True)
         except Exception as exception:
             self.driver.log_message("{}: got error.".format(self.bookTitle), self.debug)
-            if "We didn't find any results with this book title." not in str(exception):
-                screenshotPath = self.screenshotDirectory + "/" + str(self.bookTitle) + ".png"
-                self.driver.screenshot(screenshotPath)
-                self.driver.log_message("{}: saved screenshot at {}.".format(self.bookTitle, screenshotPath),
-                                        self.debug)
             self.driver.log_message(exception)
             self.set_error(True)
             self.errorMessage = str(exception)

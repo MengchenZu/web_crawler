@@ -144,9 +144,6 @@ class Driver:
         self.log_message("Scroll to bottom.")
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-    def screenshot(self, directory):
-        self.driver.save_screenshot(directory)
-
     def log_message(self, message, debug=True):
         if debug:
             with open(self.logFile, 'a+', encoding="utf8") as outfile:
