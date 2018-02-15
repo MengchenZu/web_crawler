@@ -112,10 +112,10 @@ def multiple_threads_crawlers(
                     outfile.write("{}: {} got Error.\n".format(strftime(
                         '%X %x'), crawlers[i].get_bookTitle()))
                     outfile.write("###############################################\n")
-        crawlers[i].stop()
-        crawlers[i].close_browser()
-        crawlers[i].set_error(False)
-        crawlers[i].set_errorMessage("")
+            crawlers[i].stop()
+            crawlers[i].close_browser()
+            crawlers[i].set_error(False)
+            crawlers[i].set_errorMessage("")
 
 
     with open(mainLogFile, 'a+') as outfile:
