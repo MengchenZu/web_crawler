@@ -129,7 +129,7 @@ class Crawler (threading.Thread):
         self.driver.set_log_file(logFileName)
         self.driver.log_message("start with {}".format(bookTitle), self.debug)
 
-        # get the overall reating information
+        # get the overall rating information
         rating_script = self.driver.find_element(
             "//div[@class='reviewControls__ratingDetails reviewControls--left rating_graph']/script").get_attribute(
             "innerHTML")
