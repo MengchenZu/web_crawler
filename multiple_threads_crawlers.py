@@ -56,7 +56,13 @@ def multiple_threads_crawlers(
                                     '%X %x'), crawlers[i].get_bookTitle()))
                                 outfile.write("***********************************************\n")
                             crawlers[i].stop()
-                            crawlers[i].close_browser()
+                            try:
+                                crawlers[i].close_browser()
+                            except Exception as exception:
+                                if "no such window: target window already closed" in str(exception):
+                                    pass
+                                else:
+                                    assert False, str(exception)
                             crawlers[i].set_error(False)
                             crawlers[i].set_errorMessage("")
                         else:
@@ -71,7 +77,13 @@ def multiple_threads_crawlers(
                                     '%X %x'), crawlers[i].get_bookTitle()))
                                 outfile.write("###############################################\n")
                             crawlers[i].stop()
-                            crawlers[i].close_browser()
+                            try:
+                                crawlers[i].close_browser()
+                            except Exception as exception:
+                                if "no such window: target window already closed" in str(exception):
+                                    pass
+                                else:
+                                    assert False, str(exception)
                             crawlers[i].set_error(False)
                             crawlers[i].set_errorMessage("")
                     else:
@@ -113,10 +125,15 @@ def multiple_threads_crawlers(
                         '%X %x'), crawlers[i].get_bookTitle()))
                     outfile.write("###############################################\n")
             crawlers[i].stop()
-            crawlers[i].close_browser()
+            try:
+                crawlers[i].close_browser()
+            except Exception as exception:
+                if "no such window: target window already closed" in str(exception):
+                    pass
+                else:
+                    assert False, str(exception)
             crawlers[i].set_error(False)
             crawlers[i].set_errorMessage("")
-
 
     with open(mainLogFile, 'a+') as outfile:
         outfile.write("-----------------------------------------------\n")
