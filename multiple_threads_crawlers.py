@@ -59,10 +59,9 @@ def multiple_threads_crawlers(
                             try:
                                 crawlers[i].close_browser()
                             except Exception as exception:
-                                if "no such window: target window already closed" in str(exception):
-                                    pass
-                                else:
-                                    assert False, str(exception)
+                                with open(mainLogFile, 'a+') as outfile:
+                                    outfile.write(str(exception))
+                                pass
                             crawlers[i].set_error(False)
                             crawlers[i].set_errorMessage("")
                         else:
@@ -80,10 +79,9 @@ def multiple_threads_crawlers(
                             try:
                                 crawlers[i].close_browser()
                             except Exception as exception:
-                                if "no such window: target window already closed" in str(exception):
-                                    pass
-                                else:
-                                    assert False, str(exception)
+                                with open(mainLogFile, 'a+') as outfile:
+                                    outfile.write(str(exception))
+                                pass
                             crawlers[i].set_error(False)
                             crawlers[i].set_errorMessage("")
                     else:
@@ -128,10 +126,9 @@ def multiple_threads_crawlers(
             try:
                 crawlers[i].close_browser()
             except Exception as exception:
-                if "no such window: target window already closed" in str(exception):
-                    pass
-                else:
-                    assert False, str(exception)
+                with open(mainLogFile, 'a+') as outfile:
+                    outfile.write(str(exception))
+                pass
             crawlers[i].set_error(False)
             crawlers[i].set_errorMessage("")
 
