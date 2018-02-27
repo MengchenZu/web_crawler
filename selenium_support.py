@@ -65,18 +65,20 @@ class Driver:
 
     def click_element(self, xpath=None, ele=None, inActionChain=False):
         if ele is None:
-            ele = self.driver.find_element_by_xpath(xpath)
+            newEle = self.driver.find_element_by_xpath(xpath)
+        else:
+            newEle = ele.find_element_by_xpath(xpath)
         try:
-            ele.click()
+            newEle.click()
         except Exception as exception:
             self.log_message(exception)
             if "timeout" in exception.__str__() and not inActionChain:
                 self.driver.refresh()
                 sleep(60)
-                ele.click()
+                newEle.click()
             elif "is not clickable at point" in exception.__str__() and not inActionChain:
                 self.scroll_to_top()
-                ele.click()
+                newEle.click()
             else:
                 assert False, "fail to click the element"
 

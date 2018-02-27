@@ -45,7 +45,8 @@ def multiple_threads_crawlers(
             for i in range(0, numOfCrawler):
                 if crawlers[i].get_complete():
                     if crawlers[i].get_error():
-                        if "We didn't find any results with this book title." in crawlers[i].get_errorMessage():
+                        if "We didn't find any results with this book title." in crawlers[i].get_errorMessage() or \
+                                "There are not any relevant result." in crawlers[i].get_errorMessage():
                             print(crawlers[i].get_bookTitle() + " wasn't found.")
                             notFoundList.append(crawlers[i].get_bookTitle())
                             with open(notFoundBooksFile, 'a+', encoding="utf8") as f:
@@ -65,7 +66,7 @@ def multiple_threads_crawlers(
                             crawlers[i].set_error(False)
                             crawlers[i].set_errorMessage("")
                         else:
-                            print(crawlers[i].get_bookTitle() + " got error.")
+                            print(crawlers[i].get_bookTitle() + " got Error.")
                             errorList.append(crawlers[i].get_bookTitle())
                             with open(errorBooksFile, 'a+', encoding="utf8") as f:
                                 f.write(crawlers[i].get_bookTitle() + " store in " +
@@ -101,7 +102,8 @@ def multiple_threads_crawlers(
 
     for i in range(0, numOfCrawler):
         if crawlers[i].get_error():
-            if "We didn't find any results with this book title." in crawlers[i].get_errorMessage():
+            if "We didn't find any results with this book title." in crawlers[i].get_errorMessage() or \
+                    "There are not any relevant result." in crawlers[i].get_errorMessage():
                 print(crawlers[i].get_bookTitle() + " wasn't found.")
                 notFoundList.append(crawlers[i].get_bookTitle())
                 with open(notFoundBooksFile, 'a+', encoding="utf8") as f:
@@ -112,7 +114,7 @@ def multiple_threads_crawlers(
                         '%X %x'), crawlers[i].get_bookTitle()))
                     outfile.write("***********************************************\n")
             else:
-                print(crawlers[i].get_bookTitle() + " got error.")
+                print(crawlers[i].get_bookTitle() + " got Error.")
                 errorList.append(crawlers[i].get_bookTitle())
                 with open(errorBooksFile, 'a+', encoding="utf8") as f:
                     f.write(crawlers[i].get_bookTitle() + " store in " +

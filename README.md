@@ -11,7 +11,8 @@ while other parameters have default values.
 First, we need to install one of the WebDriver (https://sites.google.com/a/chromium.org/chromedriver/ for Chrome driver)
 and add the path to the WebDriver into the file "driver_name.txt".
 
-Second, run "python -m pip install -U selenium" in command line to install selenium.
+Second, run "python -m pip install -U selenium" in command line to install selenium. And run "python -m pip install -U
+fuzzywuzzy" in command line to install fuzzywuzzy.
 
 Third, add some book titles or ISBNs for searching in GoodReads in "search_elements.txt". (There are already some
 examples in the "search_elements.txt")

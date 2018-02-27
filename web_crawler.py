@@ -1,6 +1,7 @@
 from connected_lists import *
 from selenium_support import Driver
 from web_crawlers_support import *
+from fuzzywuzzy import fuzz
 import threading
 
 
@@ -64,7 +65,7 @@ class Crawler (threading.Thread):
             self.driver.log_message("{}: work good.".format(self.bookTitle), self.debug)
             self.set_complete(True)
         except Exception as exception:
-            self.driver.log_message("{}: got error.".format(self.bookTitle), self.debug)
+            self.driver.log_message("{}: wasn't found or got Error.".format(self.bookTitle), self.debug)
             self.driver.log_message(exception)
             self.set_error(True)
             self.errorMessage = str(exception)
@@ -88,6 +89,7 @@ class Crawler (threading.Thread):
         self.driver.click_element(
             "//img[@src='https://s.gr-assets.com/assets/layout/magnifying_glass-a2d7514d50bcee1a0061f1ece7821750.png']")
 
+        sleep(1)
         # cannot find any result with the given searched element
         if self.driver.exist_element("//h3[@class='searchSubNavContainer']"):
             if "No results." in self.driver.find_element("//h3[@class='searchSubNavContainer']").text:
@@ -95,11 +97,28 @@ class Crawler (threading.Thread):
         if not self.driver.exist_element(
                 "//table[@class='tableList']//a[@class='bookTitle']") and "search?" in self.driver.current_url():
             assert False, "We didn't find any results with this book title."
+        if self.driver.exist_element("//div[@class='suggestionSmall']"):
+            if "No results found for " in self.driver.find_element("//div[@class='suggestionSmall']").text:
+                assert False, "We didn't find any results with this book title."
 
+        # select the most relevant result
         if not bookTitle.isdigit():
             if self.driver.exist_element("//table[@class='tableList']//a[@class='bookTitle']"):
                 self.driver.driver_wait("//table[@class='tableList']//a[@class='bookTitle']")
-                self.driver.click_element("//table[@class='tableList']//a[@class='bookTitle']")
+
+                bookEles = self.driver.find_elements("//table[@class='tableList']//tr")
+                found = False
+                for bookEle in bookEles:
+                    title = self.driver.find_element(".//a[@class='bookTitle']/span[@itemprop='name']", bookEle).text
+                    author = self.driver.find_element(".//a[@class='authorName']/span[@itemprop='name']", bookEle).text
+                    titleAndAuthor = title + " " + author
+                    if int(fuzz.ratio(titleAndAuthor, bookTitle)) > 80:
+                        self.driver.click_element(".//a[@class='bookTitle']", bookEle)
+                        found = True
+                        break
+
+                if not found:
+                    assert False, "There are not any relevant result."
         sleep(1)
         bookMainUrl = self.driver.current_url()
 
@@ -108,20 +127,25 @@ class Crawler (threading.Thread):
         authorName = ""
         if self.driver.exist_element("//a[@class='authorName']/span[@itemprop='name']"):
             authorName = self.driver.find_element("//a[@class='authorName']/span[@itemprop='name']").text
+        authorName = remove_invalid_characters_from_filename(authorName[:100]) \
+            if len(authorName) > 100 else remove_invalid_characters_from_filename(authorName)
+        editedBookTitle = remove_invalid_characters_from_filename(self.bookTitle[:100]) \
+            if len(self.bookTitle) > 100 else remove_invalid_characters_from_filename(self.bookTitle)
 
         if self.driver.exist_element("//div[@id='metacol']/h1[@id='bookTitle']"):
             bookFormalTitle = self.driver.find_element("//div[@id='metacol']/h1[@id='bookTitle']").text
             self.bookDirectory = remove_invalid_characters_from_filename(bookFormalTitle[:100]) \
                 if len(bookFormalTitle) > 100 else remove_invalid_characters_from_filename(bookFormalTitle)
             self.bookDirectory = \
-                self.basicDirectory + "/" + self.bookDirectory + "_" + authorName + "_" + self.bookTitle
+                self.basicDirectory + "/" + self.bookDirectory + "_" + authorName + "_" + editedBookTitle
         else:
             self.bookDirectory = remove_invalid_characters_from_filename(bookTitle[:100]) \
                 if len(bookTitle) > 100 else remove_invalid_characters_from_filename(bookTitle)
             self.bookDirectory = \
-                self.basicDirectory + "/" + self.bookDirectory + "_" + authorName + "_" + self.bookTitle
+                self.basicDirectory + "/" + self.bookDirectory + "_" + authorName + "_" + editedBookTitle
+        self.bookDirectory = self.bookDirectory[:100]
         self.driver.log_message(self.bookDirectory, self.debug)
-        
+
         self.bookDirectory = self.driver.create_directory(self.bookDirectory)
 
         # create a log file
